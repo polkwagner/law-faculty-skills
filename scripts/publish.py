@@ -26,6 +26,7 @@ SKILL_MAP = {
     "md-to-pdf":             "md-to-pdf",
     "docx-comment-summary":  "docx-comment-summary",
     "rex":                   "rex",
+    "eddie":                 "eddie",
 }
 
 # Skills that should NOT appear in output (safety check)
@@ -91,6 +92,33 @@ SCRUB_RULES = [
     (r"Polk often uses", "The default style uses"),
     (r"on Polk's behalf", "on the user's behalf"),
     (r'Just "Polk" on its own line', 'Just your first name on its own line'),
+
+    # --- Eddie-specific standalone "Polk" patterns ---
+    # "the author" — referring to the person whose document is being reviewed
+    (r"hurt Polk", "hurt the author"),
+    (r"\. Polk's voice", ". The author's voice"),
+    (r"Polk's voice", "the author's voice"),
+    (r"implies Polk is", "implies the author is"),
+    (r"implying Polk is", "implying the author is"),
+    (r"people Polk outranks", "people the author outranks"),
+    (r"authority Polk doesn't hold", "authority the author doesn't hold"),
+    (r"helps Polk", "helps you"),
+    (r"help Polk", "help you"),
+    (r"Polk should fix", "you should fix"),
+    # "the user" — referring to the person invoking Eddie
+    (r"when Polk says", "when the user says"),
+    (r"If Polk just", "If the user just"),
+    (r"If Polk says", "If the user says"),
+    (r"Polk says", "the user says"),
+    (r"Polk mentioned", "the user mentioned"),
+    (r"Polk gave", "the user gave"),
+    # Section header and sign-off
+    (r"## About Polk", "## About the Author"),
+    (r'just "Polk"', 'just "[Your First Name]"'),
+    (r'"Best,\\nPolk"', '"Best,\\n[Your First Name]"'),
+
+    # --- Final standalone "Polk" catch-all (sweeps any remaining) ---
+    (r"\bPolk\b", "[Your Name]"),
 
     # --- Directory/skill name cross-references (broadest — last) ---
     (r"ip-problems", "law-class-problems"),

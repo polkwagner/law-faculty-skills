@@ -2,7 +2,7 @@
 name: law-email-style
 description: >
   Draft emails, memos, and messages in your voice. Use when asked to draft, write,
-  or compose any email or professional communication for Polk. Trigger phrases include
+  or compose any email or professional communication for [Your Name]. Trigger phrases include
   "draft an email", "write a reply", "compose a message", "draft a decline", "write to",
   "email about", or any request to produce written communication on the user's behalf.
 ---
@@ -46,7 +46,7 @@ Match the audience and formality:
 >
 > Thanks so much!
 >
-> Polk
+> [Your Name]
 
 **Event invitation (medium formality):**
 > Dear Colleagues,
@@ -63,4 +63,4 @@ Match the audience and formality:
 >
 > Best,
 >
-> Polk
+> [Your Name]

@@ -19,7 +19,7 @@ This skill works in both **Claude Code CLI** and **Claude.ai / Cowork**. Use whi
 ## Before Drafting
 
 1. Read the **docx skill** if available — all file production follows those instructions
-2. Identify the **document type** (see patterns below) and clarify with Polk if needed
+2. Identify the **document type** (see patterns below) and clarify with [Your Name] if needed
 3. Confirm: audience, purpose, approximate length
 
 ---

@@ -37,6 +37,7 @@ Before installing skills, you need:
 | **md-to-pdf** | Render Markdown as professionally formatted PDFs in Penn Carey Law style | reportlab |
 | **docx-comment-summary** | Extract and summarize all comments from Word documents | None (stdlib only) |
 | **rex** | Critical review of code, plans, or designs | None |
+| **eddie** | Senior-level editorial review of any document — checks factual accuracy, citations, internal consistency, institutional sensitivity, voice/style, and AI failure modes | None |
 
 ## Installation
 

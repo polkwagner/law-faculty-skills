@@ -170,13 +170,15 @@ Fields left blank fall through to the standard discovery flow (read syllabus).
 ## Question Design
 
 ### Structure
-- 5 answer choices (A through E)
+- 4 answer choices (A through D)
 - Positively phrased stems (no "which of the following is NOT...")
 - Each question tests one doctrinal concept or analytical skill
 - Questions within a cluster are independent — getting one wrong does not
   prevent answering another
 - Use "Assume for purposes of this question only that..." framing when a
-  question requires a premise not established in the main narrative
+  question requires a premise not established in the main narrative, or
+  when the governing law is emerging or unsettled — specify the authority
+  students should apply
 
 ### Prohibited Formats
 - "All of the above"
@@ -190,18 +192,35 @@ Fields left blank fall through to the standard discovery flow (read syllabus).
 - **One correct answer**: Definitively best. Must survive adversarial challenge.
 - **One strong distractor**: Wrong, but requires careful analysis to eliminate.
   This is where discrimination happens.
-- **Two moderate distractors**: Plausible on first read, identifiably wrong
+- **One moderate distractor**: Plausible on first read, identifiably wrong
   with solid doctrinal knowledge.
 - **One weak distractor**: Clearly wrong to a prepared student, but might
   attract someone guessing or underprepared.
 
+Research consistently shows that four-option items are optimal for high-stakes
+assessment — three strong distractors outperform four distractors where the
+weakest is nonfunctional (Rodriguez 2005; Raymond et al. 2019). Do not add a
+fifth option.
+
 ### Answer Choice Formatting
-- All five choices should be roughly similar in length, specificity, and
+- All four choices should be roughly similar in length, specificity, and
   grammatical structure
 - Avoid patterns where the correct answer is consistently longer, more
   hedged, or more detailed than distractors
 - Vary the position of the correct answer across questions (don't cluster
   correct answers at one letter)
+
+### Reading Load Budget
+Excessive text shifts the construct being measured from doctrinal knowledge
+to reading speed (NBME Item-Writing Guide). Target these limits:
+- **Narrative:** 270-300 words per fact pattern (hard floor: 200, hard ceiling: 400)
+- **Stem:** under 75 words (shorten stems over 80 words)
+- **Answer choice:** under 35 words per option; each option states one legal
+  proposition, not a multi-step argument
+- **Total exam words** (narratives + stems + all options): under 250 words
+  per question on average. For a 40-question exam, target ~10,000 total words.
+  Exceeding 12,000 total words indicates the exam is too text-heavy and should
+  be trimmed before administration.
 
 ## Cognitive Taxonomy
 
@@ -227,7 +246,7 @@ about legal policy.
 ## Distractor Taxonomy
 
 Tag every wrong answer choice with one of these codes. Each question should
-use at least 2-3 different distractor types across its four wrong answers:
+use at least 2 different distractor types across its three wrong answers:
 
 | Code | Type                            | Description                                             |
 |------|---------------------------------|---------------------------------------------------------|
@@ -242,9 +261,13 @@ use at least 2-3 different distractor types across its four wrong answers:
 ## Difficulty Calibration
 
 ### Per-Cluster Target
-- 1 question: Moderate (70-85% of well-prepared students get it right)
+- 1-2 questions: Moderate (70-85% of well-prepared students get it right)
 - 2-3 questions: Hard (40-65% of well-prepared students)
-- 1 question: Very Hard / Discriminating (20-40% of well-prepared students)
+- 0-1 question: Very Hard / Discriminating (20-40% of well-prepared students)
+
+Not every cluster needs a VH item. Distribute VH items across the exam so
+that roughly 10-15% of all questions are VH. Overloading clusters with
+hard and very hard items increases construct-irrelevant difficulty.
 
 ### Difficulty Estimate Scale
 Tag each question with an estimated difficulty:
@@ -312,8 +335,15 @@ measurement error.
 - [ ] No "all of the above" or "none of the above"
 - [ ] No compound answers ("(a) and (b)")
 - [ ] No overlapping answer choices (where selecting one logically entails another)
-- [ ] Answer choices avoid absolute terms ("always," "never") unless
-      doctrinally accurate — these serve as unintended cues
+- [ ] Each answer choice states one legal proposition — avoid compound
+      "assertion + because + rationale" structures that turn options into
+      mini-briefs. Move embedded rationales to the answer key.
+- [ ] Answer choices avoid absolute terms ("always," "never,"
+      "automatically," "categorically," "conclusively," "per se") unless
+      doctrinally accurate — these serve as unintended cueing that allows
+      test-wise students to eliminate distractors without doctrinal
+      knowledge. Absolute terms should appear roughly equally in correct
+      and incorrect options, or not at all.
 - [ ] No grammatical cues (singular/plural mismatches, article agreement)
 - [ ] No convergence cues (correct answer overlaps most with other options)
 
@@ -399,7 +429,7 @@ The script checks all of the following. Every check must PASS.
 - [ ] Each narrative is between 200 and 400 words.
 
 **Exam document — question structure:**
-- [ ] Every question has exactly 5 answer choices labeled (a) through (e),
+- [ ] Every question has exactly 4 answer choices labeled (a) through (d),
       appearing in order immediately after the stem.
 - [ ] Question numbering is sequential (1, 2, 3, ...) with no gaps,
       no duplicates, and the total matches the planned count.
@@ -410,11 +440,11 @@ The script checks all of the following. Every check must PASS.
 **Exam document — answer choice balance:**
 - [ ] No question has a "longest answer is correct" pattern: the correct
       answer's character count must not exceed 1.4× the median character
-      count of all five choices in the same question. If it does, lengthen
+      count of all four choices in the same question. If it does, lengthen
       distractors or trim the correct answer.
 - [ ] Across the full exam, correct answer position distribution is
-      within ±2 of uniform (for 40 questions, each letter should appear
-      6–10 times).
+      within ±2 of uniform (for 40 questions with 4 options, each letter
+      should appear 8–12 times).
 - [ ] Within each fact pattern cluster, correct answers use at least
       3 different letters (for clusters of 5+ questions) or at least
       2 different letters (for clusters of 3–4 questions).
@@ -432,9 +462,9 @@ The script checks all of the following. Every check must PASS.
 - [ ] Every question number in the exam document has a corresponding
       "Question N" entry in the answer key document.
 - [ ] Every "Correct Answer: (X)" in the answer key names a letter
-      (a–e) that corresponds to an actual answer choice in the exam.
+      (a–d) that corresponds to an actual answer choice in the exam.
 - [ ] The answer key's distractor analysis for each question covers
-      exactly 4 choices (the four non-correct letters). No missing
+      exactly 3 choices (the three non-correct letters). No missing
       entries, no extra entries.
 - [ ] Every taxonomy code in the answer key is a valid code from the
       defined set (EA, AE, FB, FS/RI, DD, NR) or a course-preset alias.
@@ -473,7 +503,7 @@ Both documents should use consistent Penn Law formatting:
   - "FACT PATTERN [LETTER]" centered heading
   - Subtitle in italics: "The one with the [thing]"
   - Narrative text
-  - Numbered questions with lettered answer choices (a) through (e)
+  - Numbered questions with lettered answer choices (a) through (d)
 - Page numbers centered at bottom
 - "[ END OF EXAM ]" after the last question
 

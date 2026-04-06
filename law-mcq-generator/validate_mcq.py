@@ -63,7 +63,7 @@ def parse_exam(paragraphs):
     )
     fp_label_re = re.compile(r'^FACT\s+PATTERN\s+([A-Z])$', re.IGNORECASE)
     question_stem_re = re.compile(r'^(\d+)\.\s+')
-    choice_re = re.compile(r'^\(([a-e])\)\s+')
+    choice_re = re.compile(r'^\(([a-d])\)\s+')
 
     current_fp = None
     current_fp_header_range = None
@@ -207,10 +207,10 @@ def parse_answer_key(paragraphs):
 
     question_header_re = re.compile(r'^Question\s+(\d+)$', re.IGNORECASE)
     correct_re = re.compile(
-        r'Correct\s+Answer:\s*\(([a-eA-E])\)\s*\|\s*Taxonomy:\s*(\w+)\s*\|\s*Difficulty:\s*(\w+)',
+        r'Correct\s+Answer:\s*\(([a-dA-D])\)\s*\|\s*Taxonomy:\s*(\w+)\s*\|\s*Difficulty:\s*(\w+)',
         re.IGNORECASE
     )
-    distractor_re = re.compile(r'^\(([a-e])\)\s+\[(\w+)\]')
+    distractor_re = re.compile(r'^\(([a-d])\)\s+\[(\w+)\]')
 
     current_qnum = None
     current_distractors = []
@@ -240,7 +240,7 @@ def parse_answer_key(paragraphs):
                 continue
 
             # Parse position distribution
-            m = re.match(r'^\(([a-e])\):\s*(\d+)', text)
+            m = re.match(r'^\(([a-d])\):\s*(\d+)', text)
             if m:
                 letter = m.group(1)
                 count = int(m.group(2))
@@ -313,9 +313,9 @@ def check_narrative_completeness(fact_patterns):
 
 
 def check_question_structure(questions):
-    """Check 2: Question structure (sequential numbering, 5 choices a-e, no duplicates)."""
+    """Check 2: Question structure (sequential numbering, 4 choices a-d, no duplicates)."""
     issues = []
-    expected_letters = ['a', 'b', 'c', 'd', 'e']
+    expected_letters = ['a', 'b', 'c', 'd']
 
     if not questions:
         issues.append("No questions found")
@@ -341,7 +341,7 @@ def check_question_structure(questions):
                 detail += f" missing ({', '.join(missing)})"
             if extra:
                 detail += f" extra ({', '.join(extra)})"
-            issues.append(f"Q{qnum}: expected choices (a)-(e), found ({', '.join(letters)}){detail}")
+            issues.append(f"Q{qnum}: expected choices (a)-(d), found ({', '.join(letters)}){detail}")
 
         # Check for duplicate choice text
         choice_texts = {}
@@ -381,7 +381,7 @@ def check_fact_pattern_headers(fact_patterns):
 
 
 def check_answer_choice_length(questions, answers):
-    """Check 4: Correct answer length <= 1.4x median of all 5 choices."""
+    """Check 4: Correct answer length <= 1.4x median of all 4 choices."""
     issues = []
     for qnum in sorted(questions.keys()):
         q = questions[qnum]
@@ -421,9 +421,9 @@ def check_position_distribution(questions, answers, fact_patterns):
         if qnum in answers:
             position_counts[answers[qnum]['correct']] += 1
 
-    expected = n / 5
+    expected = n / 4
     tolerance = 2
-    for letter in 'abcde':
+    for letter in 'abcd':
         count = position_counts.get(letter, 0)
         if abs(count - expected) > tolerance:
             issues.append(
@@ -706,12 +706,12 @@ def check_question_coverage(questions, answers):
 def check_correct_answer_validity(questions, answers):
     """Check 8: Each correct answer letter exists in the exam choices."""
     issues = []
-    valid_letters = set('abcde')
+    valid_letters = set('abcd')
     for qnum in sorted(answers.keys()):
         ans = answers[qnum]
         letter = ans['correct']
         if letter not in valid_letters:
-            issues.append(f"Q{qnum}: correct answer '{letter}' is not a valid letter (a-e)")
+            issues.append(f"Q{qnum}: correct answer '{letter}' is not a valid letter (a-d)")
             continue
         if qnum in questions:
             if letter not in questions[qnum]['choices']:
@@ -720,20 +720,20 @@ def check_correct_answer_validity(questions, answers):
 
 
 def check_distractor_completeness(answers):
-    """Check 9: Each question should have exactly 4 distractor entries."""
+    """Check 9: Each question should have exactly 3 distractor entries."""
     issues = []
     for qnum in sorted(answers.keys()):
         ans = answers[qnum]
         distractors = ans.get('distractors', [])
         correct = ans['correct']
 
-        # Expected: 4 distractors (one for each non-correct letter)
-        expected_letters = sorted([l for l in 'abcde' if l != correct])
+        # Expected: 3 distractors (one for each non-correct letter)
+        expected_letters = sorted([l for l in 'abcd' if l != correct])
         actual_letters = sorted(distractors)
 
-        if len(distractors) != 4:
+        if len(distractors) != 3:
             issues.append(
-                f"Q{qnum}: expected 4 distractors, found {len(distractors)} "
+                f"Q{qnum}: expected 3 distractors, found {len(distractors)} "
                 f"({', '.join(actual_letters) if actual_letters else 'none'})"
             )
         elif actual_letters != expected_letters:
@@ -788,7 +788,7 @@ def check_summary_statistics(answers, summary):
             issues.append(f"Difficulty: {code}={actual} not mentioned in summary")
 
     # Compare position
-    for letter in 'abcde':
+    for letter in 'abcd':
         actual = pos_counts.get(letter, 0)
         stated = summary.get('position', {}).get(letter, None)
         if stated is not None and stated != actual:

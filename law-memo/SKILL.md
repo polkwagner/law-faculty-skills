@@ -5,7 +5,7 @@ description: Draft and produce formatted Word document (.docx) memos in Penn Car
 
 # Law Memo Skill
 
-Produces fully formatted Penn Carey Law memos as `.docx` files, matching Polk's established style: Penn Carey Law letterhead, standard header block, Cambria body text. Voice baseline (tone, banned phrases, preferred expressions) is defined in CLAUDE.md — that always applies. This skill adds memo-specific formatting and structure.
+Produces fully formatted Penn Carey Law memos as `.docx` files, matching [Your Name]'s established style: Penn Carey Law letterhead, standard header block, Cambria body text. Voice baseline (tone, banned phrases, preferred expressions) is defined in CLAUDE.md — that always applies. This skill adds memo-specific formatting and structure.
 
 ---
 
@@ -119,7 +119,7 @@ Memos layer these conventions on top of the CLAUDE.md voice baseline:
 
 ### Standard policy/recommendation memo
 1. **Situation paragraph** — what is the issue and why it matters (2-4 sentences)
-2. **Recommendation paragraph** — what Polk recommends, leading into bullet list if needed
+2. **Recommendation paragraph** — what [Your Name] recommends, leading into bullet list if needed
 3. **Bullet list** (if applicable) — em-dash style
 4. **Implications/advisory paragraph** (if applicable)
 5. **Next steps paragraph** — who will do what, closing the loop

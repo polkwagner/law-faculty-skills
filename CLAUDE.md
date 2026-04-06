@@ -6,37 +6,58 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A public collection of Claude Code custom skills for Penn Carey Law faculty. Each subdirectory is a standalone skill with a `SKILL.md` file that defines its behavior, triggers, and workflow. Faculty install individual skills into their `~/.claude/skills/` directory.
 
-## Repository Structure
+## Commands
 
+```bash
+# Publish skills from working installation to repo (run from repo root)
+python3 scripts/publish.py
+
+# Validate a generated MCQ exam (requires python-docx)
+python3 law-mcq-generator/validate_mcq.py exam.docx answer_key.docx
+
+# Extract comments from Word documents (stdlib only, no pip deps)
+python3 docx-comment-summary/scripts/extract_comments.py file1.docx [file2.docx ...] [-o output.md]
 ```
-skill-name/
-  SKILL.md          # Skill definition (YAML frontmatter + markdown instructions)
-  assets/           # Images, logos (optional)
-  scripts/          # Python/JS helper scripts (optional)
-  *.docx            # Sample output files (optional)
-```
 
-Published skills (11):
+There are no build steps, linters, or test suites. The repo is documentation and scripts — validation is manual (run publish, review the diff, check for leaked private strings in output).
 
-- **Assessment**: `law-mcq-generator`, `law-essay-generator`
-- **Course Prep**: `law-class-problems`, `law-class-prep`, `lecture-slide-reviewer`
-- **Documents**: `law-memo`, `law-document`, `law-email-style`
-- **Document Processing**: `md-to-pdf`, `docx-comment-summary`
-- **Review**: `rex`
+## Two-Tier Editing Model
+
+Skills fall into two categories with different editing workflows:
+
+**Synced skills (10)** — source of truth is `~/.claude/skills/`. Edit there, then run `scripts/publish.py` to copy, rename, and scrub into the repo. Never edit these in-repo — changes will be overwritten on next publish.
+
+Synced: `law-mcq-generator`, `law-essay-generator`, `lecture-slide-reviewer`, `law-memo`, `law-document`, `law-email-style`, `md-to-pdf`, `docx-comment-summary`, `rex`, `eddie`
+
+**Repo-maintained skills (2)** — edited directly in the repo. Not in the publish pipeline's `SKILL_MAP`.
+
+Repo-maintained: `law-class-problems`, `law-class-prep`
 
 ## Publish Pipeline
 
-This repo is maintained via `scripts/publish.py`, which syncs from the maintainer's working skills installation:
+`scripts/publish.py` syncs from the maintainer's `~/.claude/skills/`:
 
-1. Copies included skills from `~/.claude/skills/`
-2. Renames `polk-*` directories to `law-*`
-3. Renames files with old prefixes (e.g., `polk-memo_sample.docx` → `law-memo_sample.docx`)
-4. Applies text scrub rules to generalize personal details (name, title, email → placeholders)
-5. Skips excluded files (`design.md`, `.DS_Store`, `__pycache__/`)
-6. Runs post-scrub verification for leaked private strings
-7. Warns about unfilled placeholders (`OWNER/REPO_NAME`)
+1. Copies skills listed in `SKILL_MAP` (source name → published name)
+2. Renames `polk-*` directories to `law-*` and applies file rename rules
+3. Applies ordered regex scrub rules to generalize personal details (name, title, email → placeholders)
+4. Skips excluded files (`design.md`, `.DS_Store`, `__pycache__/`)
+5. Runs post-scrub verification — scans output for leaked private strings
+6. Warns about unfilled placeholders (repo owner/name, webhook URLs)
 
-To update published skills: edit the source skills, then run `python3 scripts/publish.py` and review the diff.
+**Scrub rule ordering matters.** Specific patterns must come before catch-all patterns (e.g., compound "Polk Wagner" contexts before the standalone catch-all). See `SCRUB_RULES` in publish.py.
+
+## .gitignore: What's Local but Not Published
+
+Several directories exist locally (as source skills or private skills) but are gitignored:
+
+- `polk-memo/`, `polk-document/`, `polk-email-style/` — source versions of synced skills
+- `send-to-email/`, `ip-problems/`, `class-prep-skill/` — private skills, not published
+- `**/design.md` — design docs within skill directories
+
+## Helper Scripts
+
+- **`law-mcq-generator/validate_mcq.py`** — Post-generation validation for MCQ exams. Checks structural integrity, answer distribution, narrative coherence, and summary accuracy across exam and answer key .docx files. Requires `python-docx`.
+- **`docx-comment-summary/scripts/extract_comments.py`** — Parses Word XML directly (stdlib `zipfile` + `ElementTree`, no pip deps) to extract comments with author, timestamp, anchored text, and replies.
 
 ## Skill File Format (SKILL.md)
 
@@ -89,15 +110,14 @@ All enforce construct alignment: every tested issue must trace to assigned readi
 
 ## Dependencies
 
-- **python-docx**: Used by memo, document, MCQ, and essay skills for .docx generation
+- **python-docx**: Used by memo, document, MCQ, essay, and validate_mcq for .docx generation/parsing
 - **ReportLab**: Used by md-to-pdf for PDF rendering
-- **docx-comment-summary** uses only Python stdlib (no pip dependencies)
+- **docx-comment-summary**: stdlib only (no pip dependencies) — parses .docx XML directly
 
 ## When Editing Skills
 
-- For most skills: edit the source in `~/.claude/skills/`, then re-run `scripts/publish.py`
-- `law-class-problems` and `law-class-prep` are maintained directly in the repo (not synced)
-- Never edit other published skill files directly — they'll be overwritten on next publish
+- Respect the two-tier model: synced skills are edited in `~/.claude/skills/`, repo-maintained skills are edited in-place
+- After publishing, review the git diff carefully — scrub rule changes can have unintended cascading effects
 - Test dual-environment path resolution when adding asset references
 - Maintain the YAML frontmatter `description` field with accurate trigger phrases
 - MCQ and essay skills use course presets; add new presets for additional courses
