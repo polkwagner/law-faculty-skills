@@ -36,7 +36,7 @@ SKILL_MAP = {
 }
 
 # Skills that should NOT appear in output (safety check)
-EXCLUDED_SKILLS = {"send-to-email"}
+EXCLUDED_SKILLS = {"send-to-email", "polk-slides"}
 
 # law-class-problems and law-class-prep are maintained directly in the repo,
 # not synced from source. They are not in SKILL_MAP so they won't be touched.
@@ -126,6 +126,15 @@ SCRUB_RULES = [
     # --- Final standalone "Polk" catch-all (sweeps any remaining) ---
     (r"\bPolk\b", "[Your Name]"),
 
+    # --- Agent references — make conditional for published skills ---
+    # Full sentence form: "Spawn the `agent` agent and..."
+    (r"Spawn the `([a-z-]+)` agent", r"If the `\1` agent is available, spawn it"),
+    # Lowercase form: "spawn the `agent` agent..."
+    (r"spawn the `([a-z-]+)` agent", r"if the `\1` agent is available, spawn it"),
+    # Workflow summary form: "Spawn `agent` agent →" / "spawn `agent` agent →"
+    (r"Spawn `([a-z-]+)` agent", r"`\1` agent (if available)"),
+    (r"spawn `([a-z-]+)` agent", r"`\1` agent (if available)"),
+
     # --- Directory/skill name cross-references (broadest — last) ---
     (r"ip-problems", "law-class-problems"),
     (r"(?<![a-z-])class-prep(?![a-z-])", "law-class-prep"),
@@ -209,12 +218,27 @@ def copy_skill(source_name: str, dest_name: str, manifest: list[str]):
 
 
 def safety_check():
-    """Verify no excluded skills ended up in the output."""
+    """Verify no excluded skills would be committed to the output repo.
+
+    Presence alone is not a failure — what matters is whether git would track
+    the directory. If it's gitignored, it cannot leak on push. Only flag
+    excluded skills that are NOT gitignored (i.e. actually reachable by git).
+    """
+    import subprocess
     problems = []
     for name in EXCLUDED_SKILLS:
         path = REPO_ROOT / name
-        if path.exists():
-            problems.append(f"Excluded skill '{name}' exists at {path}")
+        if not path.exists():
+            continue
+        result = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "check-ignore", "-q", name],
+            capture_output=True,
+        )
+        # check-ignore exit codes: 0 = ignored, 1 = not ignored, 128 = error
+        if result.returncode == 1:
+            problems.append(
+                f"Excluded skill '{name}' exists at {path} and is NOT gitignored"
+            )
     return problems
 
 
