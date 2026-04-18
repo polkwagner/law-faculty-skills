@@ -3,6 +3,9 @@ docs/
 __pycache__/
 *.pyc
 
+# Per-user Claude Code settings (permissions, etc.)
+.claude/settings.local.json
+
 # Source skills not in the public release
 polk-memo/
 polk-document/

@@ -74,6 +74,7 @@ Repo-maintained: `law-class-problems`, `law-class-prep`
 **Privacy defenses (layered):**
 - Text regex (SCRUB_RULES) — `.md`, `.py`, `.json`, etc.
 - docx metadata — `dc:creator`, `cp:lastModifiedBy`, and others cleared; `dcterms:created`/`dcterms:modified` normalized to `2000-01-01T00:00:00Z`
+- docx body XML — `scrub_text` applied to `word/*.xml` and `customXml/*.xml` (body content, headers, footers, comments, footnotes) so identifiers in document text don't slip past the metadata-only scrub
 - Pre-flight tests (`test_publish.py`) — run before every publish; fail-closed
 - Post-scrub verification — auto-derived private-string set checked against text files AND docx property XML
 - Sync-drift detection — catches hand edits that would be silently overwritten
