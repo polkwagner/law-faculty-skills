@@ -67,7 +67,7 @@ Repo-maintained: `law-class-problems`, `law-class-prep`
 3. `EXCLUDED_SKILLS` safety check blocks publication of `send-to-email`, `polk-slides`, `class-prep` (Polk-personalized), `project-folder-setup` (Polk-personalized)
 4. Applies ordered regex scrub rules to skills AND agents (name, title, email → placeholders)
 5. `SKIP_DIRS` excludes `plans/`, `specs/`, `_archive/`, `__pycache__/` (internal working artifacts)
-6. `SKIP_FILE_PATTERNS` excludes `*.v1.md` / `*.v2.md` backup snapshots
+6. `SKIP_FILE_PATTERNS` excludes `*.v1.md` versioned snapshots, backup cruft (`*.bak`/`*.bak2`/`*.backup`/`*.orig`/trailing `~`), and internal `NOTES-*.md` working notes
 7. `SKIP_FILES` excludes `design.md`, `.DS_Store`
 8. Validates skills against agentskills spec; validates agent frontmatter (name + description required)
 9. Runs post-scrub verification on skills + agents — **verification strings are auto-derived from `SCRUB_RULES`** via `derive_private_strings()`, so they can't drift from the scrub patterns
@@ -75,14 +75,16 @@ Repo-maintained: `law-class-problems`, `law-class-prep`
 11. Warns about unfilled placeholders (`OWNER/REPO_NAME`, `YOUR_WEBHOOK_URL`) anywhere in the published tree (recursive)
 
 **Privacy defenses (layered):**
-- Text regex (SCRUB_RULES) — `.md`, `.py`, `.json`, etc.
+- Text regex (SCRUB_RULES) — applied to `TEXT_EXTENSIONS` (`.md`, `.py`, `.json`, `.template`, etc.). Note `.template` is in the set: `NAMES.md.template` once shipped unscrubbed because `.template` wasn't recognized as text.
 - docx metadata — `dc:creator`, `cp:lastModifiedBy`, and others cleared; `dcterms:created`/`dcterms:modified` normalized to `2000-01-01T00:00:00Z`
 - docx body XML — `scrub_text` applied to `word/*.xml` and `customXml/*.xml` (body content, headers, footers, comments, footnotes) so identifiers in document text don't slip past the metadata-only scrub
 - Pre-flight tests (`test_publish.py`) — run before every publish; fail-closed
-- Post-scrub verification — auto-derived private-string set checked against text files AND docx property XML
+- Post-scrub verification — auto-derived private-string set checked against text files, docx property XML, **and the raw bytes of any non-text/non-docx file** (closes the silent-leak path where an unrecognized extension was copied verbatim *and* skipped by verification)
 - Sync-drift detection — catches hand edits that would be silently overwritten
 
 **Scrub rule ordering matters.** Specific patterns must come before catch-all patterns (e.g., compound "Polk Wagner" contexts before the standalone catch-all). See `SCRUB_RULES` in publish.py.
+
+**Private scrub rules (third-party names).** Source skills/fixtures (notably the eddie ecosystem and its test fixtures) cite real colleagues and academics. Their name→fictional mappings must sanitize the *published* copy but must not appear in `publish.py` itself (it's public). So they load at runtime from `~/.claude/publish-private-scrub.json` (outside the repo; schema `{"rules": [[pattern, repl], ...], "anchors": [str]}`) and append after the static `SCRUB_RULES`. The maintainer's daily-use source keeps the real names (the affiliation web-verify tests depend on them). If the file is absent, `publish.py` prints a prominent warning and runs only the static (Polk-identity) scrub. The file is synced across machines via claude-sync (single-file pair) and backed up only to the *private* claude-sync repo.
 
 ## .gitignore: What's Local but Not Published
 
