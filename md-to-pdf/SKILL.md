@@ -32,6 +32,10 @@ This skill works in both **Claude Code CLI** and **Claude.ai / Cowork**. Use whi
 - **Skills:** `~/.claude/skills/` (CLI) or `/mnt/skills/user/` (web)
 - **Output:** `~/Downloads/` or user-specified path (CLI) or `/mnt/user-data/outputs/` (web)
 
+## Filename Convention
+
+When converting a markdown source to PDF inside a project folder following the `project-folder-setup` pattern, the PDF must carry the same `vN` version stamp as the source markdown — and stay synced as the markdown iterates. Source `topic-v0.md` → `Topic_v0.pdf`; bumping markdown to `v1` → rebuild as `Topic_v1.pdf`. For one-off conversions (no versioned source), the default `[Topic]_[YYYY-MM].pdf` pattern is fine. Version semantics: v0 = preliminary, v1 = first distributed, v2+ = post-distribution modifications. See `~/.claude/skills/project-folder-setup/SKILL.md` for the full versioning workflow and the canonical project folder layout (`zz_working/`, `zz_archives/`, `zz_source-material/`, `zz_docs/`).
+
 ## Dependencies
 
 ```bash

@@ -35,6 +35,9 @@ python3 law-mcq-generator/validate_mcq.py exam.docx answer_key.docx
 
 # Extract comments from Word documents (stdlib only, no pip deps)
 python3 docx-comment-summary/scripts/extract_comments.py file1.docx [file2.docx ...] [-o output.md]
+
+# Run an eddie regression fixture (black-box — diff the report against eddie/tests/fixtures/expected.md)
+/eddie skills/eddie/tests/fixtures/<fixture>.md be aggressive lessons=skills/eddie/tests/lessons.md
 ```
 
 Tests (`test_publish.py`) run automatically before every publish. They guard the privacy-critical scrub paths (text regex, docx metadata, derived verification set). Pass `--skip-tests` to bypass; don't.
@@ -94,6 +97,19 @@ Several directories exist locally (as source skills or private skills) but are g
 
 - **`law-mcq-generator/validate_mcq.py`** — Post-generation validation for MCQ exams. Checks structural integrity, answer distribution, narrative coherence, and summary accuracy across exam and answer key .docx files. Requires `python-docx`.
 - **`docx-comment-summary/scripts/extract_comments.py`** — Parses Word XML directly (stdlib `zipfile` + `ElementTree`, no pip deps) to extract comments with author, timestamp, anchored text, and replies.
+
+## Eddie Fixture Regression Harness
+
+Eddie is an LLM document-reviewer, so it's tested as a black box, not with assertions. `eddie/tests/` ships as published content (it's in source `~/.claude/skills/eddie/`, so it survives `copy_tree`):
+
+- `tests/fixtures/*.md` — input documents, each engineered to provoke specific catches (personnel drift, misattributed affiliations, fabricated citations, a clean control).
+- `tests/fixtures/expected.md` — the validation reference: the P1/P2 findings each fixture *should* produce. Exact wording varies; check category and priority.
+- `tests/NAMES.md` — the test name registry (auto-discovered by the orchestrator's tree walk). `tests/lessons.md` — test calibrations, passed via the `lessons=` invocation arg so they don't touch the real user-global lessons file.
+- `templates/NAMES.md.template` — scaffolding the skill offers when a project has no name registry.
+
+To validate after editing eddie: run each fixture with the command above, diff the report against `expected.md`. Fewer catches than expected → the spec regressed. More catches (false positives) → second-eyes/calibration regressed. Because eddie is **synced**, edit fixtures and calibrations in `~/.claude/skills/eddie/`, not in-repo.
+
+`lessons.md` calibrations are user-global at `~/.claude/skills/eddie/lessons.md`; the repo's `eddie/lessons.md` is the published reference copy.
 
 ## Skill File Format (SKILL.md)
 

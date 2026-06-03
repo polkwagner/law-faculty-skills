@@ -9,6 +9,7 @@ Run from repo root: python3 scripts/publish.py
 """
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -83,12 +84,23 @@ SKIP_FILES = {".DS_Store", "design.md"}
 # archives are internal working artifacts, not part of a skill's published API)
 SKIP_DIRS = {"plans", "specs", "_archive", "__pycache__"}
 
-# Filename patterns to skip (regex, matched against basename). Backup files
-# like `factual-reviewer.v1.md` are versioned snapshots, not live agents.
-SKIP_FILE_PATTERNS = [re.compile(r"\.v\d+\.md$")]
+# Filename patterns to skip (regex, matched against basename).
+#   - `.v1.md` etc. are versioned snapshots, not live agents.
+#   - `.bak` / `.bak2` / `.backup` / `.orig` / trailing `~` are editor/backup
+#     cruft. CRITICAL: these are never text-scrubbed (non-TEXT_EXTENSIONS) and,
+#     before this rule, were copied verbatim AND skipped by post-scrub
+#     verification — a silent private-data leak path. They are never API surface.
+#   - `NOTES-*.md` are internal working notes (e.g. deferred-work logs), not
+#     part of a skill's published interface.
+SKIP_FILE_PATTERNS = [
+    re.compile(r"\.v\d+\.md$"),
+    re.compile(r"\.(bak\d*|backup|orig)$"),
+    re.compile(r"~$"),
+    re.compile(r"^NOTES-.*\.md$"),
+]
 
 # File extensions to apply scrub rules to
-TEXT_EXTENSIONS = {".md", ".py", ".js", ".txt", ".json", ".yaml", ".yml"}
+TEXT_EXTENSIONS = {".md", ".py", ".js", ".txt", ".json", ".yaml", ".yml", ".template"}
 
 # --- File Rename Rules ---
 FILE_RENAME_RULES = [
@@ -374,6 +386,24 @@ PERSONAL_IDENTIFIER_TOKENS = ["Polk", "Wagner", "pwagner", "polkwagner", "polk@"
 # Infrastructure secrets that don't appear as SCRUB_RULES LHS (e.g. webhook id
 # prefixes, signed URLs). Kept explicit because the derivation walks patterns.
 EXTRA_PRIVATE_STRINGS = ["AKfycbw"]
+
+# Optional private scrub rules loaded from OUTSIDE the repo. Third-party real
+# names (colleagues, cited academics) that appear in source skills/fixtures must
+# be sanitized in the published copy — but the mappings themselves are private,
+# so they must NOT live in this file (publish.py is itself published). They load
+# from a JSON file on the maintainer's machine; the public pipeline source shows
+# only this loader. Schema: {"rules": [[pattern, repl], ...], "anchors": [str]}.
+# Rules append AFTER the static SCRUB_RULES (so name→fictional runs before any
+# rule that depends on the sanitized text). Anchors extend the post-scrub
+# verification set. If the file is absent, main() emits a prominent warning and
+# only the static (Polk-identity) scrub runs.
+PRIVATE_SCRUB_PATH = Path.home() / ".claude" / "publish-private-scrub.json"
+PRIVATE_SCRUB_LOADED = False
+if PRIVATE_SCRUB_PATH.exists():
+    _priv = json.loads(PRIVATE_SCRUB_PATH.read_text(encoding="utf-8"))
+    SCRUB_RULES.extend((r[0], r[1]) for r in _priv.get("rules", []))
+    EXTRA_PRIVATE_STRINGS.extend(_priv.get("anchors", []))
+    PRIVATE_SCRUB_LOADED = True
 
 
 def _literal_from_pattern(pat: str) -> str | None:
@@ -707,6 +737,16 @@ def main():
     print("Publishing skills from", SOURCE_SKILLS_DIR)
     print("Publishing agents from", SOURCE_AGENTS_DIR)
     print("Destination:", OUTPUT_ROOT, "(DRY RUN)" if args.dry_run else "")
+    if PRIVATE_SCRUB_LOADED:
+        print(f"Private scrub rules: loaded from {PRIVATE_SCRUB_PATH}")
+    else:
+        print("*" * 70)
+        print("WARNING: private scrub file not found:")
+        print(f"  {PRIVATE_SCRUB_PATH}")
+        print("  Third-party real names (colleagues, cited academics) will NOT be")
+        print("  sanitized. Only the static Polk-identity scrub runs. Do not publish")
+        print("  eddie or its agents without this file present.")
+        print("*" * 70)
     print()
 
     if not SOURCE_SKILLS_DIR.exists():
@@ -848,6 +888,24 @@ def main():
                                         found_leaks = True
                                         has_errors = True
                 except zipfile.BadZipFile:
+                    pass
+            else:
+                # Defense-in-depth: any file that is neither text nor docx is
+                # copied verbatim (never scrubbed) AND was previously never
+                # verified — a silent leak path (see the .bak incident). Scan
+                # its raw bytes for each private string. SKIP_FILE_PATTERNS
+                # should already exclude backup cruft; this catches anything
+                # that slips through with an unexpected extension.
+                try:
+                    raw = f.read_bytes()
+                    for s in private_strings:
+                        if s.encode("utf-8") in raw:
+                            manifest.append(
+                                f"  LEAK: '{s}' in {f.relative_to(OUTPUT_ROOT)} (non-text file)"
+                            )
+                            found_leaks = True
+                            has_errors = True
+                except OSError:
                     pass
 
     if not found_leaks:

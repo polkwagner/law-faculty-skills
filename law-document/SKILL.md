@@ -1,6 +1,6 @@
 ---
 name: law-document
-description: "Draft and produce formatted Word document (.docx) general documents - proposals, reports, briefing docs, white papers, and other formal written materials - in Penn Carey Law style. Use this skill whenever the user asks to write, draft, or create a document that is not a memo or email: proposals, policy documents, reports, briefing materials, white papers, or any substantive standalone written work. Trigger phrases include write a proposal, draft a document, create a report, briefing doc, policy document, white paper, or any request to produce a formal standalone document. Use the law-memo skill instead for memos specifically."
+description: Produce formatted Word (.docx) documents in Penn Carey Law style — proposals, reports, briefing docs, white papers. Use for formal standalone documents (not memos or emails).
 license: CC-BY-4.0
 compatibility: "Requires python-docx"
 metadata:
@@ -265,7 +265,10 @@ relationships that cause Word to refuse to open the file.
 5. Add footer with page numbers on multi-page documents
 6. Save to `~/Downloads/` (CLI) or `/mnt/user-data/outputs/` (web)
 7. **Run the Post-Generation Validation** step (see below) before delivering
-8. Filename convention: `[DocType]_[Topic]_[YYYY-MM].docx` (e.g., `Proposal_StudentProjects_2025-11.docx`)
+8. Filename convention:
+   - **Default (one-off documents):** `[DocType]_[Topic]_[YYYY-MM].docx` (e.g., `Proposal_StudentProjects_2025-11.docx`).
+   - **Project-folder iterations (when generating from a versioned `-vN.md` source in a project that follows the project-folder-setup pattern):** the published `.docx` filename must carry the same version stamp as its source markdown — and must **always stay in sync** with it. Source `Topic-v0.md` → `Topic_v0.docx`; source bumps to `Topic-v1.md` → rebuild as `Topic_v1.docx`. Never let the working markdown drift to a different version stamp than the published `.docx`. Keeping the version stamp synced is the primary signal of where the editing state lives; without it, reviewers can't tell which round of edits the docx reflects.
+   - **Version semantics:** v0 = preliminary / first draft, internal editing only (not yet distributed). v1 = first distributed draft (the bump from v0 to v1 marks distribution). v2, v3, v4, … = subsequent modifications after distribution. Multiple internal Eddie reviews, polish rounds, and fact-checks all happen at v0; the bump to v1 is the distribution moment. See `~/.claude/skills/project-folder-setup/SKILL.md` for the full versioning workflow.
 
 ---
 

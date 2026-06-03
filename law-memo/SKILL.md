@@ -1,6 +1,6 @@
 ---
 name: law-memo
-description: Draft and produce formatted Word document (.docx) memos in Penn Carey Law style. Use this skill whenever the user asks to write, draft, or create a memo, memorandum, or formal internal document for faculty, committees, or the Dean's office. Trigger phrases include "write a memo", "draft a memo", "memo to faculty", "memo to EPC", "memorandum", or any request to produce a formal internal communication as a document. Always use this skill — do not attempt to format or draft memos freehand without consulting it first.
+description: Draft and produce formatted Word (.docx) memos in Penn Carey Law style. Use whenever asked to write, draft, or create a memo or memorandum.
 license: CC-BY-4.0
 compatibility: "Requires python-docx"
 metadata:
@@ -170,7 +170,10 @@ Complete all steps before delivering to the user.
 ---
 
 ## Filename Convention
-`Memo_[Topic]_[YYYY-MM].docx` (e.g., `Memo_OCI-Calendar_2025-09.docx`)
+
+- **Default (one-off memos):** `Memo_[Topic]_[YYYY-MM].docx` (e.g., `Memo_OCI-Calendar_2025-09.docx`).
+- **Project-folder iterations** (when generating from a versioned `-vN.md` source inside a project folder following the `project-folder-setup` pattern): the published `.docx` filename must carry the same version stamp as its source markdown — and must always stay in sync with it. Source `Topic-v0.md` → `Topic_v0.docx`; bumping the markdown to `v1` → rebuild as `Topic_v1.docx`. Never let the working markdown drift to a different version stamp than the published `.docx`.
+- **Version semantics:** v0 = preliminary / first draft, internal editing only (not yet distributed); v1 = first distributed draft; v2, v3, … = subsequent modifications after distribution. See `~/.claude/skills/project-folder-setup/SKILL.md` for the full versioning workflow and the canonical project folder layout (`zz_working/`, `zz_archives/`, `zz_source-material/`, `zz_docs/`).
 
 ---
 

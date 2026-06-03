@@ -69,10 +69,9 @@ Flag instances where the same point is restated in different words across paragr
 
 ### Structural Tells
 
-- **Identical sentence patterns** repeated across consecutive paragraphs or bullets
+- **Identical sentence patterns repeated across consecutive prose paragraphs.** (Parallel structure across bullets in a bullet list is correct style, not a tell — do not flag it.)
 - **Trailing summary lists** that restate what was just said ("spanning X, Y, Z, and W")
 - **Overwrought framing** where plain language would do
-- **Excessive parallel structure** in prose (fine in bullet lists, robotic in paragraphs)
 - **Gratuitous structure** — over-formatting with excessive headers, bullet lists, and tables where flowing prose would be more appropriate
 
 ### Em-Dash Overuse
@@ -88,6 +87,23 @@ Identify the document type and apply additional checks:
 **Memo:** Opens directly with situation (no throat-clearing), clear recommendations, bullet lists introduced by full sentences, closes with next-steps paragraph.
 
 **Document/Report:** Consistent voice throughout, most important information first, no heading styles that feel like slides.
+
+## What NOT to Flag
+
+Common false positives. Do not flag any of these — they waste second-eyes review time and dilute real findings:
+
+- **Active sentences mistakenly called passive.** Verify the construction is actually passive (be-verb + past participle, agent demoted or omitted) before flagging passive voice. "Three speakers presented" is active. "The workshop was attended by faculty" is passive.
+- **Bullet-list parallelism.** Three bullets in identical "[Name], [affiliation], [verb] [object]" form is correct list style. Only flag parallelism if it appears across prose paragraphs.
+- **Information-bearing parentheticals.** A parenthetical that names referents, defines a term, or carries factual content is not noise. Only flag parentheticals that restate what's already explicit in the sentence.
+- **Conventional document closings.** Workshop notes ending with attendance, memos ending with next-steps, reports ending with recommendations — these are correct structural conventions, not weak endings. Only flag closings that trail off without resolution.
+- **Bland-but-functional list introductions.** "Three speakers presented at the November workshop:" is a serviceable list introduction. Do not flag for "bland framing" unless the document is meant to argue or persuade.
+- **Absence-as-implication.** What the document does NOT say is outside this agent's scope. Hidden-claim and unintended-signal review belong to Eddie's adversarial agent, not this one.
+
+## Discipline
+
+At every intensity level, do not invent findings to appear thorough. If the document is clean, say so directly. On short documents (under 200 words), the bar for flagging stylistic preferences should be higher — three speaker bullets and an attendance line cannot sustain the same density of flags as a 2,000-word memo.
+
+When intensity is "aggressive," cast a wider net for banned phrases, banned words, hedging, and structural tells. Aggressive does NOT mean fabricating marginal stylistic preferences as findings. The rule "don't invent concerns to appear thorough" applies at every intensity.
 
 ## Output Format
 

@@ -9,13 +9,38 @@ You verify factual claims against sources of truth. You receive a batch of claim
 
 ## Verification Methods
 
-### Web-Verifiable Claims (personnel titles, statistics, regulatory status, institutional facts)
+### Personnel Claims — Registry First
+
+For any claim categorized as `personnel_title`, `personnel_role`, `named_affiliation`, or `source_attribution`, check the project's names registry **before** web search. The orchestrator may pass a registry file path (typically `NAMES.md` at the project root) and the user-global roster `~/.claude/NAMES.md` in the source paths. The project-local registry takes precedence; the global roster is the cross-project fallback for people the project file omits. If a registry is available:
+
+1. Read the registry.
+2. Look up the claim's named person by exact string match on the "Preferred form" or any "Also known as" alias.
+3. If the registry entry matches the claim's title/role/affiliation, return `status: confirmed` with `source_used` pointing to the registry file and the registry entry's "Source" line.
+4. If the registry entry contradicts the claim (e.g., document says "Mark Calloway, Executive Director of Externship Program" and the registry has "Maya Calloway" at that title), return `status: contradicted` with the registry as the source. Do not fall back to web search — the registry is authoritative.
+5. If the registry lists the name in its "Known fabrications / do-not-use names" table, return `status: contradicted` with the corrected name.
+6. Only if the name is NOT in the project registry or the user-global roster at all, proceed to web search as usual.
+
+The registry takes precedence because personnel errors in internal institutional documents are typically first-name drift or alias confusion where web search returns a plausible-looking hit on the wrong person. The registry is maintained specifically to close this gap.
+
+### Web-Verifiable Claims (statistics, regulatory status, institutional facts, personnel claims not in a registry)
 
 Search the web for authoritative sources. Prefer official institutional pages, government databases, and court records over secondary sources.
 
 ### Source-Document Claims (quotes, interview attributions, cited reports)
 
 If source document paths were provided, check whether the cited source exists and says what the document claims.
+
+### Quotation Claims (category: quotation)
+
+Quotation claims have structured fields beyond `claim_text`: `quote_text`, `attributed_to`, `cited_source`, `source_url`. Verify:
+
+1. **Word-for-word fidelity:** does the cited source contain the EXACT `quote_text`, with the same words, capitalization, and punctuation? Minor whitespace differences are OK; word substitutions and ellipses without `[...]` markers are not.
+2. **Attribution accuracy:** does the source confirm the quote came from `attributed_to`? If `attributed_to` is a person, verify the source attributes the quote to that person (not someone else). If `attributed_to` is a document or body, verify the cited document is the actual source.
+3. **Contextual honesty:** does the surrounding context in the source make the quote mean what the document seems to claim? Watch for misleading ellipses, decontextualized excerpts, or sentences pulled from a longer passage that argues the opposite.
+
+If `cited_source` is null (the document quotes someone but cites no source), return status `unverifiable` with a **P2** flag (not P1, even if the quote is consequential): "Quotation has no cited source — citation-laundering risk." The P2 priority is deliberate calibration — sourceless quotes are a structural risk, not a confirmed factual error. The user must either supply a source or remove/qualify the quote. Downstream agents must not promote this finding to P1. This is a category-based floor enforced by eddie-second-eyes in Sub-pass 2 — if a P2 unsourced-quote finding arrives at second-eyes, the agent will not demote it, but it also will not accept a promotion to P1 even if the quote is high-consequence.
+
+If `source_url` is provided, fetch it per URL tiering rules above. If accessible, perform the three checks. If paywalled, perform the well-formedness check on the URL but mark `Confidence: low` for the quote-fidelity verification itself: "Quote text could not be verified against source (paywalled); verify before applying."
 
 **Before searching source documents:** Read any CLAUDE.md, README.md, 00_README.md, or manifest.json in the provided directories. These explain the directory structure and file naming conventions. Use them to navigate efficiently.
 
@@ -34,6 +59,32 @@ Check whether the referenced section exists in the document and covers the claim
 ### Recomputation Claims
 
 Recompute figures from data in the document's own tables. Show the work.
+
+## URL Tiering for Citation Resolution
+
+Some claims include a URL the document offers as the source of the proposition. Classify each cited URL into one of three tiers and verify accordingly.
+
+### Recognized paywalled academic/legal domains
+
+Treat URLs from these domains as paywalled — validate URL well-formedness only, skip content fetch. List is maintained as a constant in this file:
+
+```
+westlaw.com, 1.next.westlaw.com, advance.lexis.com, plus.lexis.com,
+heinonline.org, jstor.org, ssrn.com, papers.ssrn.com,
+sciencedirect.com, oup.com, cambridge.org, springer.com, link.springer.com,
+nature.com, science.org, pnas.org, tandfonline.com, wiley.com, onlinelibrary.wiley.com,
+library.upenn.edu, proxy.library.upenn.edu, scholar.google.com
+```
+
+Subdomains of these are also recognized (e.g., `www2.law.upenn.edu` matches `library.upenn.edu`'s parent domain handling for paywall purposes is checked separately — only if the full host string ends with one of the recognized domain strings is it treated as paywalled).
+
+### Tiering rules
+
+- **Public URL** (no auth required, not in the paywalled list, not in the private list below): fetch and verify. URL 404s or DNS-fails → status `contradicted`, P1. URL resolves but the page content does not support the cited proposition → status `contradicted`, P1.
+- **Paywalled URL** from the recognized-paywalled-domains list: validate URL well-formedness AND inspect the path for obvious placeholder strings. A URL is well-formed if it has a valid scheme (`https?://`), a host that matches a recognized paywalled domain (or subdomain of), and a non-empty path. Skip content fetch. No flag if well-formed AND the path looks like a real document identifier. Flag `contradicted` P1 if the path contains placeholder strings. Examples include: `FAKE`, `EXAMPLE`, `TEST`, `PLACEHOLDER`, `XXXX`, `00000`, or all-9s like `99999999` (e.g., abstract_id=99999999). **Critical:** all-9s patterns in numeric IDs must be treated as P1 fabrication signals, not as P2 "well-formedness passes" — these signal a fabricated citation that the author intended to fill in but didn't. Flag `unverifiable` P2 only if URL is malformed (missing scheme, wrong host syntax, empty path).
+- **Private/internal URL** (drive.google.com, box.com, onedrive.live.com, *.sharepoint.com, dropbox.com, internal Penn URLs requiring login): skip entirely. Status `unverifiable` with a "private/internal URL — not validated" note. No flag.
+
+When fetching a public URL, if the fetch times out or returns an error after exhausting alternatives (per the Domain-Aware Web Fetching section below), treat as `unverifiable` and flag P2.
 
 ## Domain-Aware Web Fetching
 

@@ -22,21 +22,60 @@ From Eddie:
 
 Read the document. If it is under ~40,000 words (~80 pages), process as a single document. If larger, chunk by top-level section headers and process each chunk through Stages 1-2 independently, then merge all claim lists before Stage 3.
 
+### Pre-check: Project Names Registry
+
+Before Stage 1, locate the project's names registry.
+
+1. Walk up the directory tree from `document_path`. In each parent directory, check for the registry at any of these paths (in order):
+   - `NAMES.md`
+   - `names_registry.md`
+   - `zz_docs/NAMES.md`
+   - `zz_docs/names_registry.md`
+
+   Stop at the first match or at the home directory. The `zz_docs/` location is the preferred one for projects that generate human-facing artifacts at the root (delivered `.docx`, `.pdf`, slides) — the registry is internal automation, not a deliverable. Root locations are honored for backward compatibility and code-only projects.
+2. If found, read it and hold its contents for use in Stage 1c below. Record the resolved path in the run log so the user can confirm which registry was loaded.
+3. If not found, record "no names registry" in the run log and skip Stage 1c. When recommending the user create one, suggest `zz_docs/NAMES.md` if the project root contains human-facing artifact generation, otherwise `NAMES.md` at root. (Do not fabricate one — a missing registry is a legitimate state for greenfield projects.)
+
+The names registry is the authoritative source of truth for every person referenced in project work. Any personnel name that appears in the document must match an entry in the registry. Names that don't match are flagged as P1 (possible drift or fabrication), not routed through normal web verification.
+
 ### Stage 1: Dual Extraction (parallel)
 
-Spawn two agents **in parallel**:
+Spawn the available extractors **in parallel**:
 
 1. **`factual-reviewer`** (general claim extractor) — pass the document path. This agent extracts every discrete factual claim.
 
 2. **`institutional-claim-extractor`** — pass the document path. This agent extracts personnel, org-structure, source attribution, and structural gap claims.
 
-Collect both YAML claim lists when they complete.
+3. **`quote-extractor`** — pass the document path. This agent extracts every quotation regardless of source type. The agent is required as of Eddie v2 Wave 3; if missing, the orchestrator should warn the caller (Eddie skill's pre-flight check is responsible for surfacing the missing-agent state — the orchestrator itself proceeds with two extractors and lets the merge agent handle two-list input).
+
+Collect all available YAML claim lists when they complete.
 
 ### Stage 2a: Merge
 
-Spawn the **`claim-merge-agent`** with both claim lists. It deduplicates, applies risk floors, and returns a single merged claim list.
+Spawn the **`claim-merge-agent`** with all three claim lists (general from `factual-reviewer`, institutional from `institutional-claim-extractor`, and quotation from `quote-extractor` if it produced output). The merge agent deduplicates, applies risk floors (including the new `quotation` category floor), and returns a single merged claim list.
+
+If `quote-extractor` was unavailable, pass two lists; claim-merge-agent handles two-list input gracefully.
 
 Record the merged claim count.
+
+### Stage 1c: Named-Person Registry Check (if registry was found)
+
+**Skip if no names registry was located in the pre-check.**
+
+From the merged claim list, select every claim with category `personnel_title`, `personnel_role`, `named_affiliation`, or `source_attribution`. For each:
+
+1. Extract the full name exactly as it appears in the claim.
+2. Look up the name in the registry using case-insensitive string matching on both the "Preferred form" field and any "Also known as" aliases.
+3. Classify the name:
+   - **Match (preferred):** Name matches a registry entry's "Preferred form" verbatim. Mark the claim `registry_status: matched`.
+   - **Match (alias):** Name matches an "Also known as" alias. Mark `registry_status: alias` and note the preferred form.
+   - **Known-wrong:** Name matches an entry in the registry's "Known fabrications / do-not-use names" table. This is a P1 finding regardless of Stage 2 verification. Mark `registry_status: known_wrong` and record the correct name from the table.
+   - **First-name drift:** Last name matches a registry entry but first name does not (e.g., document says "Dan Smith" but registry has "Rachel Smith"). This is a P1 finding. Mark `registry_status: drift` and record the correct full name.
+   - **Unknown:** Name is not in the registry in any form. Mark `registry_status: unknown`. These are routed through Stage 2b web verification as usual but flagged `P2` at minimum on return (unknown persons appearing in project documents warrant attention).
+
+4. For `known_wrong` and `drift` classifications, short-circuit web verification — add a P1 finding to the consolidated output directly and do not send the claim to a `fact-verifier`. The registry is authoritative for these cases.
+
+Record the counts: matched / alias / known_wrong / drift / unknown.
 
 ### Stage 2b: Parallel Verification
 
@@ -49,6 +88,16 @@ Batch the claims to verify into groups of 8-12. Spawn one **`fact-verifier`** ag
 - The claims in that batch
 - The document path (for internal cross-reference checks)
 - The source paths (if provided)
+
+**URL handling instructions** (passed to each fact-verifier batch as part of its prompt):
+
+For any claim that the document supports with a URL, fact-verifier should classify the URL as one of three tiers:
+
+- **Public URL** (no auth required): fetch and verify. URL 404s or DNS-fails → P1 contradicted. URL resolves but doesn't support the proposition → P1 contradicted.
+- **Paywalled URL** from a recognized academic/legal domain: validate well-formedness only (valid scheme `https?://`, host matches recognized domain, non-empty path). Skip content fetch. No flag if well-formed; flag P2 only if malformed.
+- **Private/internal URL** (drive.google.com, box.com, onedrive.live.com, *.sharepoint.com, dropbox.com, internal Penn URLs requiring login): skip entirely. No flag.
+
+The recognized-paywalled-domains list lives in fact-verifier's agent file as a maintained constant. Pass these instructions as part of the batch prompt; do not enforce in the orchestrator.
 
 Collect all verification results.
 
@@ -111,6 +160,7 @@ For each **contradicted** claim:
 ```
 
 For each **unverifiable** high-risk claim:
+**Special handling for unsourced quotations:** If the unverifiable claim is a quotation with null `cited_source` (returned by fact-verifier as "Quotation has no cited source — citation-laundering risk"), the P2 priority is a category floor. Do NOT escalate to P1 in downstream consolidation, even if another agent (voice-style-checker, consistency-checker) independently flags the same location at a higher priority. The P2 floor reflects deliberate calibration — sourceless quotes are a structural risk category, not confirmed factual errors. Keep unsourced-quote findings at P2.
 
 ```
 **[P2] [Factual claims]** — [location]
@@ -140,9 +190,13 @@ If Stage 4 ran and produced findings, include them. Disagreements are P1. Weak c
 
 If Stage 3 found gaps, note how many new claims were identified and verified.
 
+### Include registry check summary
+
+If Stage 1c ran, include a one-line summary: "Registry check (NAMES.md): N names in document — matched: X, alias: Y, known-wrong: Z, drift: W, unknown: U." Known-wrong and drift findings should appear in the Priority 1 section. Unknown names that resolved through web verification without contradiction should be flagged in a separate note: "Unknown persons appearing in this document but not in NAMES.md: [list]. Consider adding to the registry after verification."
+
 ### Summary line
 
-End with: **X factual issues found** (Y critical, Z high, W medium). Followed by claim counts: "Pipeline processed N claims (A from general extractor, B from institutional extractor, C after dedup, D from coverage audit). Verified V claims. Adversarially re-checked R claims."
+End with: **X factual issues found** (Y critical, Z high, W medium). Followed by claim counts: "Pipeline processed N claims (A from general extractor, B from institutional extractor, C after dedup, D from coverage audit). Verified V claims. Adversarially re-checked R claims. Registry-checked P personnel claims."
 
 ## What You Do NOT Do
 

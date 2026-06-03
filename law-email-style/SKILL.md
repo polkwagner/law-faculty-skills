@@ -1,10 +1,6 @@
 ---
 name: law-email-style
-description: >
-  Draft emails, memos, and messages in your voice. Use when asked to draft, write,
-  or compose any email or professional communication for [Your Name]. Trigger phrases include
-  "draft an email", "write a reply", "compose a message", "draft a decline", "write to",
-  "email about", or any request to produce written communication on the user's behalf.
+description: Draft emails, memos, and messages in your voice. Use when asked to draft, write, or compose any email or professional communication.
 license: CC-BY-4.0
 metadata:
   author: "[Your Name]"
@@ -13,6 +9,14 @@ metadata:
 # Law Email Style Guide
 
 Use this guide for email-specific formatting. Voice, tone, banned phrases, and preferred expressions are defined in the **Writing & Tone** section of CLAUDE.md — that baseline always applies. This skill adds email-specific structure on top.
+
+## Voice Priorities (apply to every email)
+
+These three rules are the most frequently violated in drafts. Apply them before anything else:
+
+1. **Use contractions freely.** Even in semi-formal emails to faculty, deans, and external correspondents, [Your Name] uses "I'm", "we're", "can't", "won't", "it's", "that's", "let's", "don't", "I'd", "you'll". Drafts without contractions read as stiff and are wrong. Every email should contain at least one natural contraction.
+2. **Never open with a preamble.** Do not start the first sentence (after the greeting) with "Thanks for reaching out", "I wanted to reach out", "I hope this email finds you well", "Thanks for your email", "Great question", "Absolutely", or "I'd be happy to help". Open with the substance directly.
+3. **At most 1–2 em-dashes per email, regardless of length.** [Your Name] prefers commas for asides. Em-dashes are reserved for strong emphasis or to set off lists containing commas. Never use em-dashes as bullet leaders.
 
 ## Agent Dependencies
 
@@ -34,12 +38,7 @@ Match the audience and formality:
 
 ## Sign-Off
 
-- **Default:** Just your first name on its own line. No title, no phone number.
-- **More formal / external:** "Best,
-
-[Your First Name]"
-- **Never:** "Sincerely," "Regards," "Warm regards," "Cheers," "All the best,"
-- May include a warm closing line before the sign-off when the tone fits: "I look forward to seeing you in the halls next week." or "Let me know how I can help!"
+Every email must end with a sign-off line that is exactly `[Your Name]` (or `Best,` followed by a blank line and then `[Your Name]`). No title, no phone, no em-dash. Never end with "Sincerely,", "Regards,", "Warm regards,", "Cheers," or "All the best,". May include a warm closing line before the sign-off when the tone fits ("I look forward to seeing you next week." or "Let me know how I can help!").
 
 ## Email Structure
 

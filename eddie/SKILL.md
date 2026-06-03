@@ -16,13 +16,16 @@ Eddie is a senior-level editorial reviewer. Eddie reviews any written document f
 
 ## Agent Dependencies
 
-Eddie dispatches several sub-agents in parallel. Each call is guarded — Eddie still runs without them, but quality-of-result is meaningfully lower.
+Eddie dispatches several sub-agents. Each call is guarded — Eddie still runs without most of them (FPO is the only hard requirement), but quality-of-result is meaningfully lower.
 
-- `factual-pipeline-orchestrator` — runs a four-stage factual verification pipeline (dual extraction, parallel verify, coverage audit, adversarial re-verify). Internally dispatches seven other agents (`factual-reviewer`, `institutional-claim-extractor`, `claim-merge-agent`, `fact-verifier`, `coverage-auditor`, `adversarial-reverifier`, `disagreement-analyzer`).
+- `factual-pipeline-orchestrator` — **hard required.** Runs a four-stage factual verification pipeline (dual extraction, parallel verify, coverage audit, adversarial re-verify). Internally dispatches eight other agents (`factual-reviewer`, `institutional-claim-extractor`, `quote-extractor`, `claim-merge-agent`, `fact-verifier`, `coverage-auditor`, `adversarial-reverifier`, `disagreement-analyzer`).
 - `voice-style-checker` — voice, style, and AI-tell review.
 - `eddie-consistency-checker` — internal consistency scan (numeric, terminological, logical).
+- `eddie-second-eyes` *(v2 Wave 2)* — fresh-eyes quality control over Eddie's findings: false-positive scan, priority calibration, blind-spot scan. Applies `lessons.md` calibrations.
+- `fix-verifier` *(v2 Wave 3)* — verifies Eddie's own suggested fixes for P1/P2 fact replacements (names, affiliations, dates, stats, quotes, citations) against `NAMES.md` and the web. Closes the meta-error vector.
+- `quote-extractor` *(v2 Wave 3)* — Stage 1 parallel extractor; pulls every direct quotation from the document with structured fields for downstream fidelity verification.
 
-Install from the `agents/` directory of this skill's repo into `~/.claude/agents/`.
+Install from the `agents/` directory of this skill's repo into `~/.claude/agents/`. Pre-flight check (below) reports which are present at start of each run.
 
 ## Platform
 
@@ -39,12 +42,23 @@ Eddie works across all Claude surfaces. Path conventions differ by platform:
 ## Invocation
 
 ```
-/eddie path/to/file.md                    # review a specific file
-/eddie path/to/file.md be aggressive      # with tuning
-/eddie                                     # review most recent document in conversation
+/eddie path/to/file.md                                  # review a specific file
+/eddie path/to/file.md be aggressive                    # with intensity tuning
+/eddie path/to/file.md plan=path/to/plan.md             # specify planning artifact (Wave 1+)
+/eddie path/to/file.md lessons=path/to/lessons.md       # override lessons.md path (Wave 2+)
+/eddie path/to/file.md skip fix-verify                  # disable fix-verifier (Wave 3+)
+/eddie path/to/file.md skip quote-extract               # disable quote-extractor (Wave 3+)
+/eddie path/to/file.md skip second-eyes                 # disable second-eyes pass (existing)
+/eddie                                                   # review most recent document in conversation
 ```
 
-**Parse arguments:** The first argument that looks like a file path is the target. Everything else is a tuning instruction. If no file path is provided, review the most recently discussed or produced document in the conversation.
+**Parse arguments** in this order:
+1. The first argument that looks like a file path is the target document.
+2. `key=value` pairs are structured tuning. Recognized keys: `plan=<path>` (planning artifact, may repeat: `plan=a.md plan=b.md`); `lessons=<path>` (overrides default user-global `~/.claude/skills/eddie/lessons.md`, useful for fixture testing — single value only, no repetition).
+3. `skip <name>` modifiers disable specific checks. Recognized canonical names: `fix-verify`, `quote-extract`, `second-eyes`. **Legacy aliases preserved** for backward compatibility: `skip second read` and `no second eyes` both map to `skip second-eyes`.
+4. Everything else is free-text intensity tuning ("be aggressive", "light touch", etc.).
+
+If no file path is provided, review the most recently discussed or produced document in the conversation.
 
 ## Intensity
 
@@ -58,16 +72,106 @@ Eddie works across all Claude surfaces. Path conventions differ by platform:
 
 At **moderate** intensity, skip priority 4-5 items unless they are numerous enough to signal a systemic pattern worth flagging.
 
+## Pre-flight Check (Eddie v2)
+
+Before the main workflow, run a pre-flight check and print a concise summary to the screen (typically 4–8 lines). This makes degradation visible and surfaces missing-agent or missing-registry conditions upfront.
+
+### 1. Agent availability
+
+Check whether each expected agent file exists:
+
+| Agent | Path | Required? |
+|-------|------|-----------|
+| `factual-pipeline-orchestrator` | `~/.claude/agents/factual-pipeline-orchestrator/factual-pipeline-orchestrator.md` | **Hard required** |
+| `voice-style-checker` | `~/.claude/agents/voice-style-checker/voice-style-checker.md` | warn-and-proceed |
+| `eddie-consistency-checker` | `~/.claude/agents/eddie-consistency-checker/eddie-consistency-checker.md` | warn-and-proceed |
+| `eddie-second-eyes` | `~/.claude/agents/eddie-second-eyes/eddie-second-eyes.md` | warn-and-proceed (Wave 2+) |
+| `fix-verifier` | `~/.claude/agents/fix-verifier/fix-verifier.md` | warn-and-proceed (Wave 3+) |
+| `quote-extractor` | `~/.claude/agents/quote-extractor/quote-extractor.md` | warn-and-proceed (Wave 3+) |
+
+**Hard abort if `factual-pipeline-orchestrator` is missing.** Print:
+
+```
+Cannot run: factual-pipeline-orchestrator agent not installed.
+Run claude-sync to install agents from the skills repo, then retry.
+```
+
+and exit. For other missing agents, print one line per missing agent:
+
+```
+[!] Missing: voice-style-checker — voice/style review will be skipped.
+```
+
+### 2. Registry detection
+
+Walk up the directory tree from the document being reviewed. Check each parent for a names registry at any of these paths (in order):
+
+- `NAMES.md`
+- `names_registry.md`
+- `zz_docs/NAMES.md`
+- `zz_docs/names_registry.md`
+
+Stop at the first match. Surface what was found:
+
+- Found: `Registry: zz_docs/NAMES.md (12 people, 3 known-fabrication entries)` (count people from `### ` H3 headings under "## People"; count fabrications from rows of "## Known fabrications" table)
+- Not found: `Registry: not found — consider scaffolding from skills/eddie/templates/NAMES.md.template`
+
+If the project root contains delivered artifacts (`.docx`, `.pdf`, `.pptx` files at root, or a `zz_docs/` directory exists), suggest `zz_docs/NAMES.md` as the destination. Otherwise suggest `NAMES.md` at root. Show the exact `cp` command:
+
+```
+cp ~/.claude/skills/eddie/templates/NAMES.md.template zz_docs/NAMES.md
+```
+
+**Failure handling:** if multiple `NAMES.md` files exist in the tree (e.g., one at root and one at `zz_docs/`), prefer the deeper path and warn: `[!] Multiple registries found; using zz_docs/NAMES.md (deeper path wins).`
+
+**User-global roster:** always also load `~/.claude/NAMES.md` if it exists — the cross-project fallback carrying verified preferred forms, current titles, do-not-confuse pairs, and a consolidated do-not-use table. The project-local registry takes precedence on any conflict; the global roster fills gaps (people the project file omits) and supplies the cross-project known-wrong list. Surface it: `Global roster: ~/.claude/NAMES.md (23 people, 11 do-not-use entries)`. Pass its path to `eddie-second-eyes` and `fix-verifier` alongside the project registry.
+
+### 3. Lessons detection
+
+Check for `~/.claude/skills/eddie/lessons.md`. If present, count calibrations (bullet items under `## Calibrations` and `## Project-specific`). Surface:
+
+- Found: `Lessons: 7 calibrations loaded`
+- Not found: `Lessons: none`
+
+### 4. Planning-artifact discovery
+
+Apply these mechanisms in order, stopping when at least one artifact is found OR all are exhausted. **`plan=` invocation arg overrides all auto-discovery.**
+
+**(a) Filename heuristic.** Check the document's directory and two levels of subdirs for files matching: `plan*`, `*plan*`, `outline*`, `notes*`, `draft*`, `spec*` (case-insensitive). Bash equivalent:
+
+```bash
+find "$(dirname <document>)" -maxdepth 3 -type f \( -iname 'plan*' -o -iname '*plan*' -o -iname 'outline*' -o -iname 'notes*' -o -iname 'draft*' -o -iname 'spec*' \) 2>/dev/null
+```
+
+**(b) Conventional plan directories.** Scan `zz_docs/plans/`, `docs/superpowers/plans/`, `docs/superpowers/specs/`, `docs/specs/` (relative to document's parent dirs) for `.md` files modified within 30 days of the document under review.
+
+**(c) Git-log heuristic.** If document is in a git repo, run `git log --follow --max-count=10 --pretty=format:"%s" -- <document>` and inspect commit subjects. Match any of:
+- A `plan:`, `spec:`, `per:`, `re:` prefix
+- A path-like token containing `plan`, `spec`, or `outline` (e.g., `docs/superpowers/plans/2026-...`)
+
+For each matched path, verify the file exists. Heuristic only — does not parse arbitrary natural-language commit messages. If `git log` fails (corrupt repo, detached HEAD, etc.), skip silently.
+
+**(d) Conversation context scan.** Eddie itself runs as a skill in the same session as the user, so it sees prior conversation turns. Scan the last 10 user messages for: (i) explicit file paths to `.md` files that exist on disk, (ii) phrases like "here's the plan", "the spec is at", "per the outline", followed by quoted text or a path, (iii) reference to a plan or spec in the same git project. Resolve any candidates and verify they exist. Bounded scan over conversation text only — no recursion, no API calls.
+
+**(e) Explicit fallback.** If (a)–(d) found nothing, print:
+
+```
+Planning artifacts: none found via auto-discovery. If a plan exists, re-run with: /eddie <file> plan=<path>
+```
+
+Surface the result:
+
+- Found: `Planning artifacts: 2 found (zz_docs/plans/2026-05-01-foo.md, conversation: turn 14)`
+- Not found: explicit fallback message above.
+
+The pre-flight output is purely informational — it does NOT block the run except for the FPO hard-abort case.
+
 ## Workflow
 
 1. **Read** the target document completely.
 2. **Identify document type** — email, memo, proposal/report/document, academic writing, slides, or other.
 3. **Parse tuning** — determine intensity level from invocation arguments.
-4. **Scan for planning artifacts** — Before launching review agents, check for any documents that informed or planned the target output:
-   - Plans, outlines, or notes in the working directory (look for files with `plan`, `notes`, `outline`, `draft` in the name, or `.md` files with recent timestamps)
-   - Plans referenced in the current conversation (e.g., "here's the plan" followed by a draft)
-   - Task lists, TODO files, or specification documents that the output was supposed to fulfill
-   - If found, these become inputs to Agent 4 below. If none exist, skip Agent 4.
+4. **Use planning artifacts from pre-flight** — The pre-flight check (above) discovered planning artifacts. If `plan=<path>` was passed in invocation arguments, use those (overriding auto-discovery). Otherwise use whatever pre-flight surfaced. If artifacts were found, they become inputs to Agent 5 (Plan Reconciliation) below. If none exist, skip Agent 5.
 5. **Dispatch parallel review agents** — Launch the following reviews concurrently. Each agent receives the full document text (file path), the intensity level, and its specific review mandate:
 
    **Agent 1 — Factual & Citation Review:**
@@ -104,6 +208,13 @@ At **moderate** intensity, skip priority 4-5 items unless they are numerous enou
    - **Unintended signals:** Flag language that could be read as pre-deciding an outcome, favoring one faction, or foreclosing a process that should remain open. Watch for words like "obviously," "clearly," "as we all agree" — these can signal that deliberation is performative.
    - **Exposure risk:** Read every sentence as if it will be seen by someone not in the intended audience. Flag anything that would be embarrassing, actionable, or misleading if forwarded out of context.
 
+   *Discipline — when NOT to flag:*
+   - **Exposure risks require a concrete, identifiable downside grounded in the text.** Hypothetical reader inferences ("a reader could infer that...") with no specific signal in the document are speculation, not exposure risk. Do not flag.
+   - **Absence-as-implication is not exposure risk.** That a workshop has no internal speakers, a roster omits one possible name, or a list does not include every category is not, by itself, an unintended signal. External speakers at internal workshops, partial lists, and selective summaries are routine. Flag only when the absence creates a *concrete* misleading impression — not when it could be read uncharitably.
+   - **Self-acknowledged-marginal findings should not be returned.** If your own confidence on a flag is "low" and the finding is framed as "worth noting only because..." or "very minor," do not ship it. The second-eyes pass will clear it; surface only findings that survive your own judgment.
+   - **On short documents (under 200 words), structural-discipline categories rarely apply.** Excessive background, redundant argumentation, scope sprawl, and defensive over-documentation require a document long enough to exhibit them. Say "not applicable at this length" rather than padding the findings list.
+   - **Do not fabricate concerns to appear thorough.** If the document is clean on a given axis, say so directly. A short list of high-confidence findings beats a long list of low-confidence speculation every time.
+
    - Return findings as prioritized revision entries.
 
    **Agent 3 — Voice & Style Review:**
@@ -132,16 +243,44 @@ At **moderate** intensity, skip priority 4-5 items unless they are numerous enou
 6. **Merge and deduplicate** — Combine all agent results. Remove duplicates (same text flagged by multiple agents). When agents disagree on priority, use the higher priority.
 7. **Fact verification** — *Removed.* Verification is now built into the factual pipeline orchestrator (Agent 1). No separate dispatch needed.
 8. **Identify patterns** — Look across all findings for recurring issues that suggest systemic problems rather than one-off mistakes.
-9. **Second eyes** *(runs by default at moderate and aggressive; skipped at light or if "skip second read" specified)* — Dispatch a final agent that receives the original document AND the merged findings. This agent is Eddie's own quality control — a second senior editor reviewing the first editor's markup. It checks:
-   - **False positives:** Did Eddie flag something as wrong that is actually correct? Misread context, misunderstood domain-specific usage, or flagged an intentional stylistic choice.
-   - **Priority calibration:** Did Eddie rate something P1 that's really P3, or miss something that deserves P1? Fresh eyes on the priority assignments.
-   - **Fix quality:** Would Eddie's suggested revisions actually work? A fix can introduce new problems — awkward phrasing, factual drift, tone shift, or breaking something that was working.
-   - **Blind spots:** Did all five agents miss something obvious? Agents share biases — a second pass from a deliberately different angle can catch what groupthink missed.
-   - **Over-editing:** Is Eddie suggesting changes that would make the document worse? Sometimes the original is right and the editor is wrong.
-   The second-eyes agent produces a brief addendum: corrections to Eddie's own findings (with explanations), any new issues discovered, and a confidence assessment of the overall report. Findings from this step are integrated into the final report under a "Second Eyes" section.
+9. **Second eyes** *(runs by default at moderate and aggressive; skipped at light or if `skip second-eyes` / `skip second read` / `no second eyes` specified)* — Dispatch the **`eddie-second-eyes`** agent. Pass it:
+   - The document file path
+   - The merged findings list (from steps 5–8)
+   - The project's `NAMES.md` path (if found in the pre-flight check)
+   - The lessons file path: if the invocation included `lessons=<path>`, use that path; otherwise use the user-global `~/.claude/skills/eddie/lessons.md` (if it exists). The `lessons=` override exists for fixture testing and any other case where [Your Name] wants to scope-test a specific calibration set without modifying his real lessons file.
+   
+   The agent performs three sub-passes (false-positive scan, priority calibration, blind-spot scan) and returns a structured addendum with:
+   - Removed findings (false positives) with rationale and any cited lesson
+   - Priority adjustments
+   - New findings from the blind-spot scan
+   - Suggested lessons.md additions (auto-emitted when cleared findings reflect generalizable calibrations)
+   - An overall report-confidence rating
+   
+   **Integrate the addendum into the final report:**
+   - Removed findings: take them out of the priority lists; list each in the new "Considered but cleared" section (Output section below).
+   - Priority adjustments: re-classify findings into their new priority buckets.
+   - New findings: add to the appropriate priority bucket.
+   - Suggested lessons.md additions: include in the new "Suggested lessons.md additions" section at the end of the report.
+   - Report confidence: include in the existing "Second Eyes" section of the report.
+   
+   If `eddie-second-eyes` is missing or fails, surface a warning in the report ("Second-eyes pass unavailable; findings unreviewed") and ship the un-second-eyed report rather than blocking. The `lessons.md` calibrations are not applied in that case.
+
+   **After second-eyes returns, dispatch `fix-verifier`** *(Wave 3)* — pass it:
+   - The findings list as updated by second-eyes (after removals and priority adjustments, including any new findings second-eyes added)
+   - The document file path
+   - The project's `NAMES.md` path (if found in the pre-flight check)
+   - Source paths (if available)
+   
+   `fix-verifier` processes every P1 and P2 finding whose suggested fix introduces a concrete replacement value (names, affiliations, titles, dates, statistics, quoted text, source citations). It updates each finding's `Suggested:` field and `Confidence:` field based on verification results. For unverifiable fixes, it downgrades `Confidence: low` and rewrites the suggestion as "verify and replace — proposed: X, but unconfirmed."
+   
+   When fix-verifier confirms a P1 name finding (drift, fabrication, or unknown person resolved by web verification), Eddie appends a "Suggested NAMES.md updates" block to the end of the report (see Output section). [Your Name] pastes the block into NAMES.md to grow the registry.
+   
+   If `fix-verifier` is missing or fails, surface a warning ("Fix-verification unavailable; suggested replacements not independently verified") and ship the report. Confidence values reflect original-claim verification only in that case.
+   
+   Skip fix-verifier if the user passed `skip fix-verify` in the invocation.
 10. **Produce output** — Screen summary + saved report (see Output section).
 
-**Parallelization note:** Always dispatch agents 1-5 concurrently — they are independent reviews of the same document. Agent 4 only runs if planning artifacts were found. For short documents (under ~500 words), a single-pass review without agents is acceptable if faster. Use judgment.
+**Parallelization note:** Always dispatch agents 1-5 concurrently — they are independent reviews of the same document. Agent 5 (plan reconciliation) only runs if planning artifacts were found. For short documents (under ~500 words), a single-pass review without agents is acceptable if faster. Use judgment.
 
 ## Voice and Style Checklist
 
@@ -200,6 +339,8 @@ These are distributed across agents 1-3 but listed here for reference. AI-genera
 | Pattern | Agent | Default Priority |
 |---------|-------|-----------------|
 | Fabricated specificity — invented numbers/dates/stats | 1 | P1 if presented as fact, P2 if hedged |
+| **Misattributed affiliations — named academic at the wrong institution, school, or department** | 1 | P1 if presented as fact, P2 if hedged |
+| **Named-person drift — right last name, wrong first name; or name present that does not exist in project registry** | 1 | P1 always |
 | Consensus hallucination — "most scholars agree" without basis | 1 | P2 |
 | Temporal confusion — wrong dates, anachronisms | 1 | P1 |
 | Citation laundering — secondary source hiding unverified chain | 1 | P2 |
@@ -210,7 +351,19 @@ These are distributed across agents 1-3 but listed here for reference. AI-genera
 | Repetition / padding — same point restated across paragraphs | 3 | P4 |
 | Gratuitous structure — over-formatted like a slide deck | 3 | P4 |
 
-**Categorization note:** When an issue is clearly an AI-specific pattern (e.g., fabricated specificity, orphaned references), categorize it as "AI patterns" in the report rather than the agent's general category. This helps you distinguish AI-generated artifacts from ordinary editorial issues.
+**Affiliation-check rule (learned from the Delgado-Ruiz and Ellison errors):** Any named academic with a one-line characterization — "Wharton economist," "Stanford Law professor," "Minnesota-led RCT," "three from Stanford and one from Chicago" — must have the affiliation verified even when the name is mentioned casually rather than as a central cited fact. Category of error: confident-sounding affiliation claims that were never explicitly sourced. Checking mechanism: for each named academic in the document, either (a) confirm affiliation against their current faculty page / CV, or (b) remove the affiliation descriptor. The voice-style pass and priority-calibration pass both historically missed these because the name was flagged as "clean" without the affiliation being a direct object of review. Treat every `[Name], [Institution] [role]` construction as a citable claim.
+
+**Names-registry rule (learned from the Kathy Lambert and Mark Calloway errors, 2026-04-21):** Every project Eddie reviews should have a `NAMES.md` file that lists every person referenced in project work with a preferred form, title, authoritative source, and a "do not confuse with" entry for common drift errors. **Preferred location:** `zz_docs/NAMES.md` when the project root contains human-facing artifact generation (delivered `.docx`, `.pdf`, slides) — root is reserved for human-facing deliverables, and the registry is internal automation. For code-only or mixed projects without human-facing deliverables at root, `NAMES.md` at root is fine. The factual-pipeline-orchestrator auto-loads the registry at Stage 1c, walking the directory tree and checking `NAMES.md`, `names_registry.md`, `zz_docs/NAMES.md`, and `zz_docs/names_registry.md` in each parent. When suggesting that a project create a registry, default to `zz_docs/NAMES.md` for document-generating projects. The registry is the authoritative source for personnel claims — not web search, not prior-conversation memory, not Claude's training data. The orchestrator also loads the **user-global roster `~/.claude/NAMES.md`** as the cross-project fallback (project-local wins on conflict); a personnel name absent from the project registry but present in the global roster resolves there, not via web search.
+
+Checking mechanism:
+1. For each personnel name in the document, cross-check against `NAMES.md` before routing to web verification.
+2. If the first name differs from the registry entry but the last name matches, that is first-name drift — P1, regardless of whether the web knows the wrong version exists.
+3. If the name appears in the registry's "Known fabrications / do-not-use names" table, that is P1 — the registry carries forward past incidents so the same error does not recur.
+4. If the name is not in the project registry, check the user-global roster `~/.claude/NAMES.md` before web verification; a match there resolves it (project-local wins on conflict). Only if the name is in neither, flag P2 and suggest either adding to the registry after verification or correcting the reference.
+
+This failure mode has recurred because fluent prose with a plausible first name reads as correct to every downstream reviewer — the prior Eddie pipeline sent "Mark Calloway, Executive Director of the Externship Program" through web verification without catching that the correct first name was Rachel. The registry closes that gap by making the first name a direct object of cross-check, not a passive feature of a composite claim.
+
+**Categorization note:** When an issue is clearly an AI-specific pattern (e.g., fabricated specificity, orphaned references, misattributed affiliations), categorize it as "AI patterns" in the report rather than the agent's general category. This helps you distinguish AI-generated artifacts from ordinary editorial issues.
 
 ## Priority Scale
 
@@ -267,6 +420,7 @@ Save as markdown:
 ```markdown
 # Eddie Review: [Document Name]
 
+**Eddie version:** 2.0
 **Date:** [YYYY-MM-DD]
 **Intensity:** [light / moderate / aggressive]
 **Document type:** [email / memo / document / other]
@@ -319,26 +473,63 @@ Save as markdown:
 
 ---
 
+## Considered but cleared
+
+The second-eyes pass reviewed the following items and ruled them clean. Listed for transparency — no action needed.
+
+[Every cleared finding gets a one-line entry. Format:
+- **[Section, paragraph]** — flagged as [original category, e.g., banned phrase ("ensure")]. Cleared: [rationale; if cleared via lessons.md rule, cite the rule].
+
+If nothing was cleared: "No findings were cleared; all flagged items survived second-eyes review."]
+
+---
+
 ## Patterns
 
 [If Eddie notices recurring issues — e.g., systematic overclaiming, consistent use of banned phrases, pattern of unsupported assertions — note them here as a brief editorial observation. This section helps you address root causes, not just individual instances.]
 
 ## Second Eyes
 
-[If the second-eyes pass ran, include its findings here. Format:]
+[If the second-eyes pass ran, include its findings here. Format follows the eddie-second-eyes agent's structured addendum:]
 
-**Report confidence:** [high / moderate / low — overall assessment of how reliable Eddie's findings are]
+**Report confidence:** [high / moderate / low — overall assessment of how reliable Eddie's findings are after the second-eyes pass]
 
-**Corrections to Eddie's findings:**
-- [Any false positives removed, priorities adjusted, or suggested fixes revised — with explanation]
+**Removed findings (false positives):**
+- [Each finding the second-eyes pass cleared, with rationale. If a lesson from `lessons.md` was cited, include it. These items also appear in the "Considered but cleared" section above for transparency. If none: "No false positives identified."]
 
-**Additional issues found:**
-- [Anything the second-eyes pass caught that agents 1-5 missed]
+**Priority adjustments:**
+- [Each finding whose priority changed, with original → new priority and reasoning. If none: "No priority changes."]
 
-**Over-editing warnings:**
-- [Any cases where Eddie's suggested revision would make the document worse]
+**New findings (blind-spot scan):**
+- [Anything the second-eyes pass caught that the upstream review missed. Each item has location, problem, suggested fix, and confidence. If none: "No new findings."]
 
-[If no corrections or additions: "Second eyes confirmed: no changes to Eddie's findings."]
+[Note: Fix-quality verification (whether suggested replacements like names/affiliations/dates are themselves correct) is handled by the `fix-verifier` agent in Wave 3 — not by second-eyes. Confidence values for individual fixes appear in the priority lists, not here.]
+
+## Suggested lessons.md additions
+
+[If the second-eyes pass auto-suggested any new calibrations for `~/.claude/skills/eddie/lessons.md`, list them here as ready-to-paste markdown bullets. [Your Name] reviews and pastes (or doesn't). Format:
+
+- [proposed lesson text] — based on cleared finding [ID], [date].
+
+If none qualify: "No new calibrations suggested."]
+
+## Suggested NAMES.md updates
+
+[When `fix-verifier` confirms a P1 name finding (drift, fabrication, or unknown person resolved by web verification), include a ready-to-paste markdown block here. [Your Name] pastes it into the project's NAMES.md to grow the registry.
+
+Format per entry:
+
+### [Preferred Form]
+
+- **Title:** [verified title]
+- **Affiliation:** [verified affiliation]
+- **Authoritative source:** [URL or registry source used for verification]
+- **Also known as:** [alias that produced the original error, e.g., "Mark Calloway" if the document misnamed Maya Calloway]
+- **Notes:** [date caught, what the original error was, any drift-prevention notes]
+
+If a suggested update would conflict with an existing registry entry (same surname, different preferred form), prefix with: `[CONFLICT — registry has "X", suggested "Y"]` and recommend manual review before pasting.
+
+If no suggestions: omit the section.]
 ```
 
 ## What Eddie Does NOT Do

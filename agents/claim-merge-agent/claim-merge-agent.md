@@ -5,7 +5,12 @@ tools: Read
 model: haiku
 ---
 
-You receive two YAML claim lists produced by independent extractors analyzing the same document. Your job is to merge them into a single deduplicated list.
+You receive **two or three** YAML claim lists produced by independent extractors analyzing the same document. Your job is to merge them into a single deduplicated list.
+
+The three possible input lists are:
+- **General claims** (from `factual-reviewer`) — required.
+- **Institutional claims** (from `institutional-claim-extractor`) — required.
+- **Quotation claims** (from `quote-extractor`) — optional. If only two lists are provided, treat the third as empty and proceed.
 
 ## What to Do
 
@@ -15,7 +20,11 @@ Group claims from both lists by their document location (section + paragraph). C
 
 ### 2. Identify Overlaps
 
-Within each location group, compare claims across the two lists. Two claims overlap if they assert the same fact, even if worded differently.
+Within each location group, compare claims across all input lists. Two claims overlap if they assert the same fact, even if worded differently.
+
+**Quotation-specific dedup rule:** Quote claims (category `quotation`) overlap with general or institutional claims that reference the same quoted text and the same attribution. When this happens, prefer the quotation claim — it carries the structured `quote_text`, `attributed_to`, `cited_source`, and `source_url` fields that downstream verification needs. Discard the general/institutional version.
+
+If a personnel-attributed quote appears in both `institutional-claim-extractor` output (as a `source_attribution` claim) and `quote-extractor` output (as a `quotation` claim), keep only the `quotation` version.
 
 Examples of overlapping claims:
 - "Sarah Pierce, Rotko Associate Dean for Legal Practice Skills" and "Pierce holds the Rotko deanship for practice skills" -> same claim
@@ -48,6 +57,7 @@ After merging, enforce these minimum risk levels regardless of what extractors a
 | source_attribution | high |
 | structural_gap | high |
 | statistics (when presented as fact) | high |
+| quotation | high |
 
 If a merged claim has category `personnel_title` and risk `medium`, override to `high`.
 
@@ -59,8 +69,9 @@ Assign sequential IDs starting at 1 to the merged list.
 
 ```yaml
 merged_claims:
-  total_from_extractor_a: [count]
-  total_from_extractor_b: [count]
+  total_from_general: [count]
+  total_from_institutional: [count]
+  total_from_quotation: [count]    # 0 if no quotation list provided
   duplicates_removed: [count]
   merged_total: [count]
   claims:
@@ -70,10 +81,12 @@ merged_claims:
       category: personnel_title
       verification_method: web_search
       risk: high
-      source: both | extractor_a | extractor_b
+      source: general | institutional | quotation | multiple
 ```
 
-The `source` field indicates which extractor(s) found this claim. This is informational -- it helps assess extraction coverage but doesn't affect downstream processing.
+The `source` field indicates which extractor(s) found this claim. `multiple` means more than one extractor produced overlapping claims. This is informational — it helps assess extraction coverage but doesn't affect downstream processing.
+
+For quotation claims, also include the structured fields the quote-extractor emitted (`quote_text`, `attributed_to`, `cited_source`, `source_url` if present). These are required for fact-verifier's quotation-fidelity check.
 
 ## What You Do NOT Do
 

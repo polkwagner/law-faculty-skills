@@ -1,0 +1,32 @@
+# Project Names Registry
+
+Authoritative source for personnel names in this project. The factual-pipeline-orchestrator
+checks every personnel claim against this file before web verification.
+
+**Convention:** Preferred form is what appears in delivered documents. Aliases catch
+common variants (former names, nicknames, initials). The "Known fabrications" table
+captures past errors so they don't recur.
+
+## People
+
+### Maya Calloway
+
+- **Title:** Executive Director, Externship Program
+- **Affiliation:** University of Pennsylvania Carey Law School
+- **Authoritative source:** https://www.law.upenn.edu/faculty/example (replace with current URL)
+- **Also known as:** R. Calloway
+- **Notes:** First name is frequently misremembered as "Dan" — see Known fabrications below. Always verify first name before using.
+
+### [Add additional people here]
+
+- **Title:** [exact title as it should appear in delivered documents]
+- **Affiliation:** [institution + unit]
+- **Authoritative source:** [faculty page URL, email signature, official directory entry, etc.]
+- **Also known as:** [list of aliases that should resolve to this entry; omit field if none]
+- **Notes:** [optional — anything that affects how this person is referenced]
+
+## Known fabrications / do-not-use names
+
+| Wrong form | Correct form | Date caught | Notes |
+|------------|--------------|-------------|-------|
+| Mark Calloway | Maya Calloway | 2026-04-21 | First-name drift; canonical case study for the registry pattern |

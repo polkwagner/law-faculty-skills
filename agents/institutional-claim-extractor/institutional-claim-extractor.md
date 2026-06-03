@@ -17,10 +17,15 @@ Read the entire document. Extract every claim in these categories:
 |----------|----------------|
 | **personnel_title** | Every person named, paired with their title exactly as stated in the document. If the same person appears with a title in multiple places, extract each instance separately. |
 | **personnel_role** | Every claim about what a person does, oversees, manages, directs, or is responsible for. |
+| **named_affiliation** | Every `[Name], [Institution/School/Department]` or `[Name] at [Institution]` or `[Institution] [role]` construction for a named individual — even when mentioned casually (e.g., "Jane Doe, Harvard economist" or "Stanford professor Jane Doe" or "the Minnesota RCT led by Schwarcz"). Extract the person, the institution, and any narrower unit (school, department, center). Extract one claim per person-affiliation pair. |
 | **org_structure** | Who reports to whom, what office houses what function, how programs are organizationally situated. |
-| **source_attribution** | Every instance where the document says information came from an interview, a document, a specific source, or a person. Includes "X reported that..." and "According to X..." |
+| **source_attribution** | Every instance where the document says information came from an interview, a document, a specific source, or a person. Includes "X reported that..." and "According to X..." Note: the parallel `quote-extractor` agent specifically handles direct quotations with structured fields. If a source attribution is paired with a direct quote (e.g., "X said: '...'"), `quote-extractor` will produce the richer claim. Extract attributions normally; the merge agent dedups quote-paired attributions in favor of the quote-extractor version. |
 | **institutional_assertion** | Program names, office names, committee names, and how programs or offices are described or characterized. |
 | **structural_gap** | Instances where a program, office, or function is described substantively but no responsible person is identified. See Structural Gap Detection below. |
+
+**Why `named_affiliation` gets its own category (new 2026-04):** A prior Eddie review shipped with "Marco Delgado-Ruiz, Wharton economist" (he's at Penn SAS Economics) and "Four law professors — three from Stanford and one from Chicago" (only one of the four was at Stanford). Both errors propagated through multiple surfaces because the name was treated as "clean" and the affiliation descriptor wasn't a direct object of review. The fix is to make every named-academic affiliation an extracted claim, verified independently of the person's name.
+
+**Names registry downstream (new 2026-04-21):** Your personnel claims (`personnel_title`, `personnel_role`, `named_affiliation`, `source_attribution`) will be cross-checked against the project's `NAMES.md` registry by the orchestrator before web verification. Extract claims normally — include the exact full name as it appears in the document, even if you suspect first-name drift. The registry check is what catches "Mark Calloway" vs. the registry's "Maya Calloway"; your job is to make sure the claim is captured so that check can happen.
 
 ### Structural Gap Detection
 
@@ -45,6 +50,7 @@ Example structural gap:
 All claims in these categories are **high risk** by default:
 - personnel_title
 - personnel_role
+- named_affiliation
 - org_structure
 - source_attribution
 
@@ -58,6 +64,7 @@ These are the exact failure modes that motivated this agent's creation. Do not d
 
 - personnel_title → `web_search`
 - personnel_role → `web_search`
+- named_affiliation → `web_search` (check the person's current faculty page or CV for their actual institution/school/department)
 - org_structure → `web_search` or `source_document`
 - source_attribution → `source_document`
 - institutional_assertion → `web_search`
