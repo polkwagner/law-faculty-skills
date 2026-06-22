@@ -37,6 +37,7 @@ Skills are invoked naturally in conversation — you don't need special syntax:
 | **law-email-style** | Draft emails in a professional academic voice | None |
 | **md-to-pdf** | Render Markdown as professionally formatted PDFs in Penn Carey Law style | reportlab |
 | **docx-comment-summary** | Extract and summarize all comments from Word documents | None (stdlib only) |
+| **materials-md** | Convert PDF, DOCX, PPTX, or HTML to clean, AI-ready markdown | [materials-converter](https://github.com/ai-teaching-lab/materials-converter) (`docling`) |
 | **rex** | Critical review of code, plans, or designs | None |
 | **eddie** | Senior-level editorial review of any document — checks factual accuracy, citations, internal consistency, institutional sensitivity, voice/style, and AI failure modes | None |
 
