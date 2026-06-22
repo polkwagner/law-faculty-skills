@@ -30,6 +30,10 @@ python3 scripts/publish.py --dry-run
 # Run the privacy-scrub tests directly (also runs as pre-flight in publish.py)
 python3 scripts/test_publish.py
 
+# Run a single test class or method (unittest)
+python3 scripts/test_publish.py ScrubTextTests
+python3 scripts/test_publish.py ScrubTextTests.test_<name>
+
 # Validate a generated MCQ exam (requires python-docx)
 python3 law-mcq-generator/validate_mcq.py exam.docx answer_key.docx
 
@@ -50,9 +54,24 @@ Skills fall into two categories with different editing workflows:
 
 Synced: `law-mcq-generator`, `law-essay-generator`, `lecture-slide-reviewer`, `law-memo`, `law-document`, `law-email-style`, `md-to-pdf`, `docx-comment-summary`, `rex`, `eddie`
 
-**Repo-maintained skills (2)** — edited directly in the repo. Not in the publish pipeline's `SKILL_MAP`.
+**Repo-maintained skills (3)** — edited directly in the repo. Not in the publish pipeline's `SKILL_MAP`.
 
-Repo-maintained: `law-class-problems`, `law-class-prep`
+Repo-maintained: `law-class-problems`, `law-class-prep`, `materials-md`
+
+`materials-md` is a thin natural-language wrapper around the standalone
+[`materials-converter`](https://github.com/ai-teaching-lab/materials-converter) tool
+(installed via pip). It is intentionally repo-maintained rather than synced: the maintainer's
+local `~/.claude/skills/materials-md/` still points at a local checkout, while the published
+copy targets the pip-installed `materials-convert` command.
+
+> **This repo is Dropbox-synced across two machines.** `git status` can show stale divergence
+> (files dirty but byte-identical to upstream, or duplicate parallel commits with the same
+> message but different SHAs) and even local git-object corruption — Dropbox syncs file
+> contents and `.git` state at different rates. Before committing: `git fetch`, verify each
+> dirty file with `git diff origin/main -- <path>`, and commit selectively by pathspec. Never
+> `git add -A` blind, never force-push. The published skill copies are *derived artifacts*
+> (regenerable via `publish.py` from `~/.claude` source), so a tangled local history is
+> disposable — prefer realigning to `origin/main` and re-deriving over untangling parallel commits.
 
 ## Publish Pipeline
 

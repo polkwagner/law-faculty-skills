@@ -35,6 +35,8 @@ These must never appear:
 - "robust" (be specific about what makes it strong)
 - "landscape" (when describing a field or topic)
 - "ensure" (usually filler — say what will actually happen)
+- "register" (when it means voice/tone — use "voice," "tone," or "the way it sounds")
+- "mental model" / "mental models" (consultant-speak — name the actual thing)
 
 ### Filler Phrases (flag every instance)
 
@@ -74,9 +76,35 @@ Flag instances where the same point is restated in different words across paragr
 - **Overwrought framing** where plain language would do
 - **Gratuitous structure** — over-formatting with excessive headers, bullet lists, and tables where flowing prose would be more appropriate
 
+### Abstraction Tells (smooth symmetry that says little)
+
+This is the family [Your Name] flags most often: prose that is fluent, balanced, and
+abstract — the polish hides that it names nothing concrete. Flag:
+
+- **Hollow antithesis.** Neat two-part oppositions where the parallel structure
+  stands in for a real point — e.g., "hands the student two mental models to
+  reconcile when she needed one to deepen" (the tidy "two…one / reconcile…deepen"
+  balance). It sounds profound and resolves nothing. Fix: replace the symmetry
+  with the specific image, party, or consequence (e.g., "a second framing to
+  reconcile with the professor's").
+- **Abstraction nouns standing in for the thing.** "mental model(s)," "register"
+  (for voice/tone), "lens," "paradigm," "framing" used vaguely. They gesture at
+  precision without delivering it. Fix: name the actual thing.
+- **Dangling abstract verbs.** A verb whose meaning lives in an object that's been
+  dropped — "to deepen" (deepen *what?*), "to engage," "to optimize," "to unlock."
+  Fix: supply the object or rewrite concretely.
+- **Tense drift inside the clever sentence.** These constructions often slip tense
+  mid-sentence ("hands… when she *needed*") because the writer is tuning the
+  rhythm, not the meaning. Flag the mismatch.
+
+- **Announcing the act instead of doing it (meta-signposting).** "so I report them plainly," "Here I have to be precise," "the places it stayed hard are worth naming," "I want to defend that claim carefully," "let me be clear," "to be honest." The sentence narrates the writing instead of performing it. Fix: cut the announcement; do the thing.
+- **Virtue-signaling by strawman / moralizing closer.** A tacked-on sentence that flatters the text against a worse hypothetical — "the paper that pretends otherwise does the reader no favors," "a lesser analysis would stop here" — often on a stock idiom. Announces virtue instead of adding substance. Fix: cut it.
+
+Priority: P3 — undermines the concrete, authoritative voice.
+
 ### Em-Dash Overuse
 
-Count em-dashes (—) per page (~300 words). More than 2 per page is a flag. Suggest replacing most with commas.
+Count em-dashes (—) per page (~300 words). More than 2 per page is a flag. Suggest replacing most with commas. **Exception — academic register:** for scholarly papers (see "Academic register" above), ~2–4 load-bearing em-dashes per page is correct voice. Do not flag em-dash density there; flag only uniform, mechanical, non-load-bearing dashes or their total absence.
 
 ### Format-Specific Checks
 
@@ -87,6 +115,32 @@ Identify the document type and apply additional checks:
 **Memo:** Opens directly with situation (no throat-clearing), clear recommendations, bullet lists introduced by full sentences, closes with next-steps paragraph.
 
 **Document/Report:** Consistent voice throughout, most important information first, no heading styles that feel like slides.
+
+### Academic register (papers, law-review articles, scholarly essays)
+
+When the document is a scholarly paper — first person, numbered sections (I/II/III), footnotes, a journal/SSRN target — [Your Name] writes in a distinct academic voice that **overrides several email/memo defaults**. Detect the register first; if academic, apply this section and relax the rules it names. Source profile: `…/AI Law Lab/AI Final Exam Project/Paper - Can AI Ace Your Exam/paper/voice-profile.md` (built from twelve of his papers, weighted to *Information Wants to Be Free* and *Poisoning the Next Apple?*).
+
+**Rule overrides — do NOT flag these in academic register:**
+- **Em-dashes ~2–4 per page** are correct and load-bearing (inline gloss; appositive that *expands*; dramatic pause before a payoff; in-sentence list). The tell is *uniform, mechanical* dashes — or none at all — not the dash itself. This supersedes the "1–2/page" rule below.
+- **Heavier parentheticals** (in-situ definitions, concessions, the occasional ironic aside), **semicolons**, and **tricolons** ("Code is law; architecture is control; software is power") are voice, not clutter.
+- **Varied sentence rhythm** — short declarative punch next to a long clause-rich sentence — is intentional. Do not flag sentence length where the rhythm varies (uniform length is the machine tell, not variety).
+
+**Positive move-set — expect these; flag their ABSENCE or inversion:**
+- **Committing opening:** a short, confident first sentence that commits to a frame (cultural image then pivot; name-the-consensus-he'll-complicate; frame-with-colon; flat magnitude claim; or a scene). Flag any **procedural throat-clearing** opening ("Over the X period, a model was run through…") — that is the anti-voice.
+- **"And yet" pivot** and **concede-then-turn** (*To be sure / Surely / Of course …* → *And yet / But / Instead*): his signature structure. Do NOT flag these as hedging or false balance — they are the argument.
+- **Colon-payoff:** setup, colon, the substance (especially a number or finding). Where a draft starts a weak new sentence instead, suggest the colon.
+- **One-line verdict close** that echoes or inverts the title. Flag any closing that **recaps the parts** ("In conclusion," restatement of sections) — that is the anti-voice.
+- **Numbers stated bare with an immediate benchmark** ("63% … the remaining 37%"; "about three times greater in Canada"). Flag a number left to sit with no magnitude/benchmark, and flag rounding rhetoric ("approximately") on a descriptive count.
+- **Hedge the inference, not the observation:** descriptive counts stated flat ("I find," "the data reveal," "I report"); causal/forward claims hedged and time-bound ("appears to," "at least to date"). Flag reflexive hedging ("may," "arguably," "it could be argued") on an observation he would state flat.
+- **First person early**, position stated before the argument, no false balance. **Italics for the contrast word**, sparingly.
+
+**Academic-specific AI tells — ADD these to the standard screen:**
+- **Bold inline emphasis in prose** — his own AI tell. Bold belongs only in headings; in-paragraph emphasis is italics, used sparingly. Flag every bold span inside body prose.
+- Procedural throat-clearing openings; summary-recap closings; uniform/mechanical em-dashes (or their total absence); numbers without a benchmark; reflexive hedging on observations.
+
+**Capitalization:** subjects lowercase ("a body of doctrine the model commands"); course/exam names title case ("the Constitutional Law grader," "on Legislation"). "sat **for** the exam," never "sat the exam."
+
+Everything else still applies in academic register — the banned-phrase list, the **Abstraction Tells** family (hollow antithesis, meta-announcement, virtue-signaling closers, abstraction nouns, dangling verbs), repetition, and gratuitous structure are all bad in academic prose too.
 
 ## What NOT to Flag
 

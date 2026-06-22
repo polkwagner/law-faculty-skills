@@ -43,6 +43,10 @@ go under "Project-specific" with the project name.
 
   - Do not infer the recommender's relationship scope from the transcript or resume ("only one course, no TA/RA, therefore the character/demeanor claims are unsupported"). Faculty routinely advise, mentor, and counsel students outside any enrolled course, and that contact appears on no transcript. Flag personal-quality claims as an exposure risk only when the document itself shows no plausible basis — not merely because the course record is thin — and confirm with the recommender before treating an out-of-class-knowledge claim as overreach.  (2026-05-16, Brackenridge rec)
 
+  - In anonymized academic drafts, audit footnote/reference **keys** (not just the prose) for name- or example-derived tokens — a `[^surname]` or `[^distinctive-conceit]` key is a grep-able deanonymization leak even when the rendered prose is fully anonymized, because markdown→Word/PDF can surface keys as visible anchors and anyone sent the source file can grep them. Recommend renaming such keys to neutral tokens and auditing every key, not just the one caught.  (2026-06-04, Can AI Ace Your Exam — Eddie P1-4)
+
+  - On personal/professional websites and bio pages written in the subject's own voice, confident first-person framing — soft quantifiers ("a lot of my time"), aspirational claims ("out in front of"), rhetorical anaphora ("real cases, real briefs, real oral arguments"), and hedged superlatives ("one of the most intensive") — is genre-appropriate and should not be flagged as overclaiming or AI-tell unless it makes a falsifiable factual claim. Calibrate against website-bio norms, not email/memo norms.  (2026-06-15, polkwagner.com homepage review)
+
 
 ## Project-specific
 
