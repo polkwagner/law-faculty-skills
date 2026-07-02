@@ -69,10 +69,12 @@ AGENT_MAP = {
 }
 
 # Skills that should NOT appear in output (safety check)
-#   send-to-email, polk-slides: private skills with personal infrastructure
+#   send-to-email, polk-slides, polk-zotero: private skills with personal
+#     infrastructure (polk-zotero hardcodes Polk's Zotero userID and
+#     personal collection keys)
 #   class-prep, project-folder-setup: Polk-personalized (repo has generalized
 #     law-class-prep; project-folder-setup has no public counterpart yet)
-EXCLUDED_SKILLS = {"send-to-email", "polk-slides", "class-prep", "project-folder-setup"}
+EXCLUDED_SKILLS = {"send-to-email", "polk-slides", "class-prep", "project-folder-setup", "polk-zotero"}
 
 # law-class-problems and law-class-prep are maintained directly in the repo,
 # not synced from source. They are not in SKILL_MAP so they won't be touched.

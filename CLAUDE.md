@@ -110,7 +110,7 @@ copy targets the pip-installed `materials-convert` command.
 Several directories exist locally (as source skills or private skills) but are gitignored:
 
 - `polk-memo/`, `polk-document/`, `polk-email-style/` — source versions of synced skills
-- `send-to-email/`, `ip-problems/`, `class-prep-skill/` — private skills, not published
+- `send-to-email/`, `ip-problems/`, `class-prep-skill/`, `polk-zotero/` — private skills, not published (`polk-zotero` hardcodes Polk's Zotero userID and personal collection keys)
 - `**/design.md` — design docs within skill directories
 - Dropbox "conflicted copy" files (e.g., `README (Polk Wagner's conflicted copy ...).md`, `publish (... conflicted copy ...).py`) — artifacts of two-machine sync; safe to delete once reviewed
 
