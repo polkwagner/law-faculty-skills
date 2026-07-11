@@ -41,7 +41,6 @@ SKILL_MAP = {
     "polk-memo":             "law-memo",
     "polk-document":         "law-document",
     "polk-email-style":      "law-email-style",
-    "md-to-pdf":             "md-to-pdf",
     "docx-comment-summary":  "docx-comment-summary",
     "rex":                   "rex",
     "eddie":                 "eddie",
@@ -74,7 +73,12 @@ AGENT_MAP = {
 #     personal collection keys)
 #   class-prep, project-folder-setup: Polk-personalized (repo has generalized
 #     law-class-prep; project-folder-setup has no public counterpart yet)
-EXCLUDED_SKILLS = {"send-to-email", "polk-slides", "class-prep", "project-folder-setup", "polk-zotero"}
+#   md-to-pdf: ships Polk's personal DD letterhead art and licensed ITC Stone
+#     Serif fonts. Binary assets cannot be scrubbed, and the fonts are not ours
+#     to redistribute. Was public as a generic ReportLab skill through
+#     2026-07-11; removed when it became the asset-bundled WeasyPrint renderer.
+EXCLUDED_SKILLS = {"send-to-email", "polk-slides", "class-prep", "project-folder-setup",
+                   "polk-zotero", "md-to-pdf"}
 
 # law-class-problems and law-class-prep are maintained directly in the repo,
 # not synced from source. They are not in SKILL_MAP so they won't be touched.
