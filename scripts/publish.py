@@ -73,10 +73,13 @@ AGENT_MAP = {
 #     personal collection keys)
 #   class-prep, project-folder-setup: Polk-personalized (repo has generalized
 #     law-class-prep; project-folder-setup has no public counterpart yet)
-#   md-to-pdf: ships Polk's personal DD letterhead art and licensed ITC Stone
-#     Serif fonts. Binary assets cannot be scrubbed, and the fonts are not ours
-#     to redistribute. Was public as a generic ReportLab skill through
-#     2026-07-11; removed when it became the asset-bundled WeasyPrint renderer.
+#   md-to-pdf: ships Polk's personal DD letterhead art (his name, title, and
+#     signature mark). Private by design — it deploys to his own Anthropic
+#     account (API + claude.ai) via deploy.py, but never to this public repo.
+#     NOTE: an earlier version also bundled licensed ITC Stone Serif; that was
+#     replaced with Caladea (open-licensed Cambria metric clone). The font is no
+#     longer a reason for this exclusion — the letterhead art still is. Do not
+#     remove md-to-pdf from EXCLUDED_SKILLS.
 EXCLUDED_SKILLS = {"send-to-email", "polk-slides", "class-prep", "project-folder-setup",
                    "polk-zotero", "md-to-pdf"}
 
