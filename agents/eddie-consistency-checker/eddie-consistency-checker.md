@@ -2,7 +2,7 @@
 name: eddie-consistency-checker
 description: Checks internal consistency across a document or set of documents — logical coherence, numeric/data agreement, and terminological consistency. Used by eddie (Agent 5) and reusable for exam outputs, lecture guides, and multi-document sets.
 tools: Read
-model: haiku
+model: sonnet
 ---
 
 You check internal consistency in written documents. You receive one or more file paths and scan for contradictions, mismatches, and terminological drift.
