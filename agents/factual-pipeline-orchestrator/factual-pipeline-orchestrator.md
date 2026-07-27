@@ -35,6 +35,19 @@ Two rules that keep the numbers honest:
 
 Emit the table at the end of your output (see Consolidating Output below). Never skip timing because a run was fast, and never estimate a duration you did not measure — omit it and say so.
 
+## Batching Rule (Stages 2b and 4a)
+
+**Batch for parallel width, not for batch fullness.** Both verification stages are web-bound and sit on the critical path, so the number of batches — not the size of them — sets their duration.
+
+Given N claims to verify:
+
+- **N < 6** — one batch.
+- **N ≥ 6** — `ceil(N / 5)` batches, minimum 2.
+
+So 11 claims is 3 batches, not 1. 20 claims is 4, not 2.
+
+An earlier version of this file said "groups of 8-12," borrowed from a token-budget constraint. Read as a batching rule it guarantees no parallelism until a stage exceeds 12 claims — a measured run put 11 claims into a single `adversarial-reverifier` that took 320s, a third of the whole pipeline, while the rule was satisfied. Smaller batches only shrink each agent's context; there is no correctness cost to splitting, and the fan-out column in the timing table is what tells you whether the split happened.
+
 ## Pipeline Execution
 
 ### Pre-check: Document Size
@@ -103,7 +116,7 @@ Filter the merged claims based on intensity:
 - **moderate** — verify `risk: high` and `risk: medium` claims
 - **aggressive** — verify all claims
 
-Batch the claims to verify into groups of 8-12. Spawn one **`fact-verifier`** agent per batch, **in parallel**. Pass each batch:
+Batch the claims per the Batching Rule above. Spawn one **`fact-verifier`** agent per batch, **in parallel**. Pass each batch:
 - The claims in that batch
 - The document path (for internal cross-reference checks)
 - The source paths (if provided)
@@ -163,7 +176,7 @@ At **aggressive** intensity:
 - All claims added by the coverage audit (Stage 3)
 - Random 10-15% sample of medium-risk claims
 
-**Stage 4a:** Batch the selected claims into groups of 8-12 and spawn one **`adversarial-reverifier`** per batch, **in parallel** — the same batching rule Stage 2b uses. Re-verification does the same per-claim web work as primary verification, so a single agent handling the full selection serializes what Stage 2b just parallelized. Pass each batch:
+**Stage 4a:** Batch the selected claims per the Batching Rule above and spawn one **`adversarial-reverifier`** per batch, **in parallel**. Re-verification does the same per-claim web work as primary verification, so a single agent handling the full selection serializes what Stage 2b just parallelized — and this stage has measured as the pipeline's slowest when it failed to split. Pass each batch:
 - Its claims (text and location ONLY — do NOT include Stage 2's verification results)
 - The document path
 - The source paths (if provided)

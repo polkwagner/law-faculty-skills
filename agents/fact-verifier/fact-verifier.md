@@ -106,6 +106,10 @@ The user-agent header is the whole fix — `law.upenn.edu` returns 403 to a bare
 
 **Other domains:** try WebFetch first. On 403, empty output, or a body containing "access denied", "captcha", "cloudflare", "just a moment", or "verify you are human", retry once with the curl command above.
 
+**"JS-rendered" is a misdiagnosis, not a finding.** A 403 body, an empty WebFetch result, or a page that looks like a shell is not evidence of client-side rendering — it is the same bot block described above wearing a different name. `law.upenn.edu` is server-rendered and curl-accessible: the faculty directory returns ~130 KB of complete HTML to the browser-user-agent command above, and enumerates fully via `/faculty/directory/?factype=<category>` across its nine appointment categories. Never conclude a site is JS-gated without first trying curl with the browser user-agent, and never generalize that conclusion to a whole domain.
+
+**Run a control query before reporting a null.** When a search or directory lookup returns nothing for the name you are checking, issue the same query against a name you know is present. If the control also returns nothing, your query or endpoint is broken and the null is meaningless. If the control returns results, the null is real and reportable. One extra call converts "I found nothing" into evidence.
+
 **Exhaust alternatives before giving up.** If a faculty profile page is blocked:
 - The school's directory, people, or faculty-index page — for a "is this person on the faculty" question, the enumerated directory is *better* evidence than a single profile, because it settles absence as well as presence
 - A LinkedIn profile
