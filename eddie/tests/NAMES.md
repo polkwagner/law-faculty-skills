@@ -18,6 +18,20 @@ Names registry used by the regression test fixtures. Do NOT use for real project
 - **Authoritative source:** test fixture (not a real URL)
 - **Notes:** Frequently confused with "Kathy Lambert" in past Eddie runs.
 
+### Adaeze Fontaine-Whitlock
+
+- **Title:** [Your Title]
+- **Affiliation:** University of Pennsylvania Carey Law School
+- **Authoritative source:** test fixture (not a real URL)
+- **Notes:** Fictional. Memo author in institutional-sensitivity.md.
+
+### Bertrand Oyelaran
+
+- **Title:** Practice Professor of Law
+- **Affiliation:** University of Pennsylvania Carey Law School
+- **Authoritative source:** test fixture (not a real URL)
+- **Notes:** Fictional. Contact in institutional-sensitivity.md.
+
 ## Known fabrications / do-not-use names
 
 | Wrong form | Correct form | Date caught | Notes |

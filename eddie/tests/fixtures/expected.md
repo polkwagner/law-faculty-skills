@@ -33,6 +33,38 @@ Manual validation reference. After running `/eddie` against each fixture (with `
 
 **Failure signal:** if fix-verifier downgrades the "Maya Calloway" suggestion to `Confidence: low`, the agent isn't finding the test registry (likely the registry path isn't being passed through correctly — check Task 9 step 1's lessons-pass equivalent for NAMES.md).
 
+## institutional-sensitivity.md
+
+**Test intent:** validate the Agent 2 / second-eyes split. Agent 2 surfaces findings without self-filtering; `eddie-second-eyes` applies the standing clearance rules. This fixture plants one finding that must survive and two that must be cleared. It is deliberately over 500 words so Eddie dispatches agents rather than taking the single-pass path.
+
+**Must be caught (gating):**
+
+- **P1 or P2 — institutional sensitivity** — "Between us, the Dean has already signaled he wants Rosalind Achebe-Farrar, so a third slot would be decorative" is a concrete exposure risk: it pre-decides an outcome, reveals a private steer, and would be damaging if forwarded or FOIAed. This must appear in the final report. If it does not, Agent 2 or second-eyes has over-corrected and the change is broken.
+- **P2 or P3 — role/authority boundary** — "I've decided the committee will forward two names" asserts a decision that is the committee's to make. Expect a flag on the verb.
+- **P3 — orphaned reference** — "As the clinical-appointments discussion above makes clear, this factor carries the least weight" refers to a clinical-appointments discussion that never occurs anywhere in the memo.
+
+**Must be cleared, not suppressed upstream (gating):**
+
+These two exist to prove the pipeline surfaces marginal findings and clears them *visibly*. Passing means either (a) they appear under "Considered but cleared" with the standing rule cited, or (b) they never appear at all. Failing means they appear as live findings in the final report.
+
+- **Absence-as-implication** — all four workshop speakers are external. A speculative reviewer flags this as an unintended signal about internal faculty. The standing rule in `eddie-second-eyes` Sub-pass 1 says external speakers at internal workshops are routine; this clears.
+- **Hypothetical inference** — "The subcommittee met twice in October" invites "a reader could infer the screen was rushed." No specific signal in the text supports that. The standing rule says hypothetical reader inferences with no grounding are speculation; this clears.
+
+**Advisory (do not gate):**
+
+- Structural discipline should fire somewhere on the Background section — four nested historical antecedents to explain an unchanged charge. Priority and phrasing will vary.
+- "ensure" does not appear; voice/style findings here are incidental.
+- The candidate ("Rosalind Achebe-Farrar") and the four workshop speakers are not in the test registry and may each draw an unknown-person flag at P2. That is expected noise orthogonal to this fixture's purpose, not a failure. The memo's author and contact ARE registered, so they should pass Stage 1c without flags.
+- **Unplanted-but-real defects, confirmed 2026-07-27.** A second-eyes blind-spot scan found four genuine defects in this fixture's prose that were not deliberately planted. They are correct catches and should NOT be read as regressions. Recorded so future runs can distinguish them from new failures:
+  - Logistics mandates distribution "through the committee's shared folder" and then instructs "do not remove files from the building" — the two controls are mutually unenforceable.
+  - The subcommittee "met twice in October" but files do not circulate until March 20, an unexplained five-month gap.
+  - "through the committee's shared folder rather than by email, as we did last cycle" — the trailing clause attaches to either side of "rather than", yielding opposite meanings.
+  - Bertrand Oyelaran appears bare on first mention (Logistics) and with his title on second (closing), inverting the identify-then-shorten convention.
+- **Quantum caution.** An adversarial pass described the Background section as "roughly a third" of the memo; it is closer to a quarter (~160 of ~640 words). Either characterization may appear; neither is a failure.
+- **Standing-rule coverage is partial.** The absence-as-implication bait (all four workshop speakers external) did not provoke the intended reading in validation — the section was flagged for scope and for unrecorded informal candidate contact instead. That standing rule therefore remains untested by this fixture. Standing rule 3 (low-confidence marginal findings clear by default) IS exercised, via the P4/P5 findings the adversarial pass now ships rather than suppresses.
+
+**Diagnostic value:** if both "must be cleared" items appear as live findings, second-eyes is not applying the standing rules — check that Task 10 Step 3's renumbering (step 5 → 6) did not disturb Sub-pass 1. If the "must be caught" exposure risk is missing, Agent 2 is still self-filtering — check that Task 10 Step 1 applied.
+
 ## clean.md
 
 - **No P1 or P2 findings** — the document is clean.
