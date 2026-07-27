@@ -16,6 +16,25 @@ From Eddie:
 - `intensity` — light | moderate | aggressive
 - `source_paths` — (optional) list of reference directories/files
 
+## Stage Timing (required)
+
+Record wall-clock elapsed time for every stage. This is the only way to tell whether a pipeline change helped, and the pipeline has no other timing source.
+
+Take a timestamp with `date +%s` at pipeline start and again as each stage's agents return:
+
+```bash
+date +%s
+```
+
+Stages to time: `pre-checks`, `stage-1-extract`, `stage-2a-merge`, `stage-1c-registry`, `stage-2b-verify`, `stage-3-coverage` (Branch A, including its gap verification), `stage-4a-adversarial` (Branch B), `stage-4b-disagreement`, `consolidate`.
+
+Two rules that keep the numbers honest:
+
+- **Branch A and Branch B run concurrently, so their durations overlap.** Report each branch's own elapsed time, and report the wave's wall-clock as the max of the two, not the sum. A timing table that sums concurrent branches will make a working pipeline look slower than a broken one.
+- **Record the fan-out width alongside the duration** — how many `fact-verifier` batches Stage 2b spawned, how many `adversarial-reverifier` batches Stage 4a spawned. A stage that took 90s across 6 batches and one that took 90s in a single agent are different problems.
+
+Emit the table at the end of your output (see Consolidating Output below). Never skip timing because a run was fast, and never estimate a duration you did not measure — omit it and say so.
+
 ## Pipeline Execution
 
 ### Pre-check: Document Size
@@ -101,6 +120,21 @@ The recognized-paywalled-domains list lives in fact-verifier's agent file as a m
 
 Collect all verification results.
 
+### Stages 3 and 4a run CONCURRENTLY
+
+**Do not run Stage 3 to completion before starting Stage 4a.** The stages are numbered for reading order, not dependency order. Stage 4a's claim selection is derived from Stage 2 results, which are already in hand — it does not wait on the coverage audit.
+
+Once Stage 2b returns, launch both branches in the same wave:
+
+- **Branch A:** Stage 3 (coverage audit) and any gap verification it triggers.
+- **Branch B:** Stage 4a (adversarial re-verification) over the Stage-2-derived selection.
+
+Join both branches before Stage 4b.
+
+At **aggressive** intensity only, coverage-audit claims also belong in the re-verification set. Do not serialize the whole stage for them — run Branch B as above on the Stage-2-derived claims, then spawn one additional Stage 4a wave for the gap claims after Branch A returns.
+
+Both branches are web-bound. Running them in sequence roughly doubles the slowest part of the pipeline for no gain.
+
 ### Stage 3: Coverage Audit
 
 **Skip if intensity is `light`.**
@@ -129,12 +163,12 @@ At **aggressive** intensity:
 - All claims added by the coverage audit (Stage 3)
 - Random 10-15% sample of medium-risk claims
 
-**Stage 4a:** Spawn the **`adversarial-reverifier`** with:
-- The selected claims (text and location ONLY — do NOT include Stage 2's verification results)
+**Stage 4a:** Batch the selected claims into groups of 8-12 and spawn one **`adversarial-reverifier`** per batch, **in parallel** — the same batching rule Stage 2b uses. Re-verification does the same per-claim web work as primary verification, so a single agent handling the full selection serializes what Stage 2b just parallelized. Pass each batch:
+- Its claims (text and location ONLY — do NOT include Stage 2's verification results)
 - The document path
 - The source paths (if provided)
 
-Collect the adversarial results.
+Collect the adversarial results from all batches.
 
 **Stage 4b:** Spawn the **`disagreement-analyzer`** with:
 - Stage 2's verification results for the re-verified claims
@@ -193,6 +227,29 @@ If Stage 3 found gaps, note how many new claims were identified and verified.
 ### Include registry check summary
 
 If Stage 1c ran, include a one-line summary: "Registry check (NAMES.md): N names in document — matched: X, alias: Y, known-wrong: Z, drift: W, unknown: U." Known-wrong and drift findings should appear in the Priority 1 section. Unknown names that resolved through web verification without contradiction should be flagged in a separate note: "Unknown persons appearing in this document but not in NAMES.md: [list]. Consider adding to the registry after verification."
+
+### Include the stage timing table
+
+Emit the measured timings (see Stage Timing above) as the last block of your output:
+
+```
+**Pipeline timing** (total NNs)
+
+| Stage | Elapsed | Fan-out |
+|---|---|---|
+| Pre-checks | Ns | — |
+| Stage 1 — extraction | Ns | 3 agents ∥ |
+| Stage 2a — merge | Ns | 1 |
+| Stage 1c — registry | Ns | inline |
+| Stage 2b — verification | Ns | N batches ∥ |
+| Stage 3 — coverage (Branch A) | Ns | 1 + N gap batches ∥ |
+| Stage 4a — adversarial (Branch B) | Ns | N batches ∥ |
+| Branch A ∥ B wave wall-clock | Ns | max(A, B) |
+| Stage 4b — disagreement | Ns | 1 |
+| Consolidate | Ns | inline |
+```
+
+Skipped stages get `skipped (light intensity)` rather than a duration. If you failed to capture a timestamp for a stage, write `not measured` — do not estimate.
 
 ### Summary line
 

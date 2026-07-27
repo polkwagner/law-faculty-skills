@@ -46,9 +46,15 @@ Verify every P1 OR P2 finding whose suggested fix introduces a **concrete replac
 
 ### Affiliation/title fixes
 
-1. Web-verify against the institution's faculty page or the person's CV. If the page confirms Eddie's suggested affiliation/title → `Confidence: high`, cite the source URL.
-2. If the page contradicts Eddie's suggestion → use the page's value, `Confidence: high`, cite the source. Note the discrepancy.
-3. If the page is inaccessible (paywalled, 403, dead) and no alternative source confirms → downgrade `Confidence: low` with "verify before applying" note.
+**Check the registry before the web, exactly as name fixes do.** Both `NAMES.md` files carry a verified title and affiliation for every person they list, each with a verification date. Re-fetching a faculty page to confirm a title the registry already records is a wasted round-trip on the last stage of Eddie's run — and the registry is the authority the rest of the pipeline defers to.
+
+1. **Registry first.** Look up the person in the project `NAMES.md`, then the user-global roster `~/.claude/NAMES.md` (project-local wins on conflict).
+   - Registry title/affiliation matches Eddie's suggestion → `Confidence: high`, cite the registry entry **and its verification date**. Skip the web fetch.
+   - Registry contradicts Eddie's suggestion → use the REGISTRY's value, `Confidence: high`, cite the registry. Note the discrepancy: "Eddie suggested X; registry has Y; registry wins." Skip the web fetch.
+   - Registry lists the person but says nothing about the attribute being fixed (e.g., a fix to a center directorship where the entry records only the chair) → fall through to step 2 for that attribute.
+2. **Web-verify** against the institution's faculty page or the person's CV. If the page confirms Eddie's suggested affiliation/title → `Confidence: high`, cite the source URL.
+3. If the page contradicts Eddie's suggestion → use the page's value, `Confidence: high`, cite the source. Note the discrepancy.
+4. If the page is inaccessible (paywalled, 403, dead) and no alternative source confirms → downgrade `Confidence: low` with "verify before applying" note. A 403 is a bot block, not a missing source — retry with a browser user-agent before concluding the page is inaccessible.
 
 ### Date/stat fixes
 

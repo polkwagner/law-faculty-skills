@@ -168,6 +168,8 @@ The pre-flight output is purely informational — it does NOT block the run exce
 
 ## Workflow
 
+**Time the run.** Before step 1 and after each of the four outer hops, take a timestamp with `date +%s`. The outer hops are: the **parallel agent wave** (step 5 — its duration is the slowest agent, normally `factual-pipeline-orchestrator`), **merge and pattern analysis** (steps 6–8), **second eyes** (step 9), and **fix verification**. These are Eddie's serial critical path — the parallel wave hides everything except its slowest member, so a slow run is almost always one of these four. `factual-pipeline-orchestrator` returns its own per-stage table; pass it through rather than re-deriving it. Report both in the "Run Timing" section of the detailed report. If a timestamp was missed, write `not measured` — never estimate a duration.
+
 1. **Read** the target document completely.
 2. **Identify document type** — email, memo, proposal/report/document, academic writing, slides, or other.
 3. **Parse tuning** — determine intensity level from invocation arguments.
@@ -529,6 +531,24 @@ Format per entry:
 If a suggested update would conflict with an existing registry entry (same surname, different preferred form), prefix with: `[CONFLICT — registry has "X", suggested "Y"]` and recommend manual review before pasting.
 
 If no suggestions: omit the section.]
+
+## Run Timing
+
+[Always include. Two tables — Eddie's outer hops, then the factual pipeline's stages as `factual-pipeline-orchestrator` reported them.
+
+**Outer hops** (total NNs)
+
+| Hop | Elapsed |
+|---|---|
+| Pre-flight + read | Ns |
+| Parallel agent wave (step 5) | Ns — slowest: [agent name] |
+| Merge + patterns (steps 6-8) | Ns |
+| Second eyes | Ns / skipped |
+| Fix verification | Ns / skipped |
+
+Then reproduce the orchestrator's pipeline timing table verbatim.
+
+This section exists so pipeline changes can be evaluated against something other than impression. Note the intensity level and the claim count alongside the timings — a moderate run on a 600-word memo and an aggressive run on a 40-page report are not comparable.]
 ```
 
 ## What Eddie Does NOT Do
