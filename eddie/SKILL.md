@@ -208,14 +208,13 @@ The pre-flight output is purely informational — it does NOT block the run exce
    - **Unintended signals:** Flag language that could be read as pre-deciding an outcome, favoring one faction, or foreclosing a process that should remain open. Watch for words like "obviously," "clearly," "as we all agree" — these can signal that deliberation is performative.
    - **Exposure risk:** Read every sentence as if it will be seen by someone not in the intended audience. Flag anything that would be embarrassing, actionable, or misleading if forwarded out of context.
 
-   *Discipline — when NOT to flag:*
-   - **Exposure risks require a concrete, identifiable downside grounded in the text.** Hypothetical reader inferences ("a reader could infer that...") with no specific signal in the document are speculation, not exposure risk. Do not flag.
-   - **Absence-as-implication is not exposure risk.** That a workshop has no internal speakers, a roster omits one possible name, or a list does not include every category is not, by itself, an unintended signal. External speakers at internal workshops, partial lists, and selective summaries are routine. Flag only when the absence creates a *concrete* misleading impression — not when it could be read uncharitably.
-   - **Self-acknowledged-marginal findings should not be returned.** If your own confidence on a flag is "low" and the finding is framed as "worth noting only because..." or "very minor," do not ship it. The second-eyes pass will clear it; surface only findings that survive your own judgment.
+   *Discipline — report what you find, tag your confidence:*
+   - **Report every issue you find, including ones you are uncertain about.** Do not filter for importance or confidence at this stage. The second-eyes pass is the filter, and it runs against [Your Name]'s `lessons.md` calibrations — which you cannot see. Surfacing a finding that later gets cleared costs one line in "Considered but cleared"; suppressing a real one costs the whole point of the review.
+   - **Tag every finding with `Confidence: high / medium / low`.** This is how the second-eyes pass ranks and clears them. A low-confidence finding with an honest tag is useful. A suppressed one is invisible.
+   - **Do not fabricate concerns to appear thorough.** Reporting what you actually noticed is not the same as inventing concerns to fill a quota. If the document is clean on a given axis, say so directly.
    - **On short documents (under 200 words), structural-discipline categories rarely apply.** Excessive background, redundant argumentation, scope sprawl, and defensive over-documentation require a document long enough to exhibit them. Say "not applicable at this length" rather than padding the findings list.
-   - **Do not fabricate concerns to appear thorough.** If the document is clean on a given axis, say so directly. A short list of high-confidence findings beats a long list of low-confidence speculation every time.
 
-   - Return findings as prioritized revision entries.
+   - Return findings as prioritized revision entries, each carrying a `Confidence:` value.
 
    **Agent 3 — Voice & Style Review:**
    If the `voice-style-checker` agent is available, spawn it and pass it the document file path.
