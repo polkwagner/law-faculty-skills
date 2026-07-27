@@ -266,12 +266,22 @@ The pre-flight output is purely informational — it does NOT block the run exce
    
    If `eddie-second-eyes` is missing or fails, surface a warning in the report ("Second-eyes pass unavailable; findings unreviewed") and ship the un-second-eyed report rather than blocking. The `lessons.md` calibrations are not applied in that case.
 
-   **After second-eyes returns, dispatch `fix-verifier`** *(Wave 3)* — pass it:
-   - The findings list as updated by second-eyes (after removals and priority adjustments, including any new findings second-eyes added)
+   **After second-eyes returns, dispatch `fix-verifier`** *(Wave 3)*. First select the findings it will process: every P1 and P2 finding whose suggested fix introduces a concrete replacement value. Then **batch them and spawn one `fix-verifier` per batch, in parallel** — this hop has measured at a third of Eddie's total runtime, and it is the last serial step before the report ships.
+
+   Batching, in order:
+
+   1. **Group by subject first.** Findings about the same person, statistic, or source belong in one batch — they share web lookups, and splitting them makes two agents fetch the same faculty page. Subject grouping also keeps dependent findings together: when one finding proposes removing a name and another proposes a title for that same name, the second is moot if the first is applied, and only a single agent seeing both can say so.
+   2. **Then apply the width rule to the groups.** Fewer than 6 groups: one agent. Six or more: `ceil(N / 5)` agents, minimum 2. Never let a single agent take the whole set just because it fits.
+
+   Pass every batch:
+   - Its assigned findings, from the list as updated by second-eyes (after removals and priority adjustments, including any new findings second-eyes added)
    - The document file path
    - The project's `NAMES.md` path (if found in the pre-flight check)
+   - The user-global roster `~/.claude/NAMES.md`
    - Source paths (if available)
-   
+
+   Merge the batches' results back into one findings list before producing output. Batching changes nothing about what gets verified — expect the same verdicts, reached concurrently.
+
    `fix-verifier` processes every P1 and P2 finding whose suggested fix introduces a concrete replacement value (names, affiliations, titles, dates, statistics, quoted text, source citations). It updates each finding's `Suggested:` field and `Confidence:` field based on verification results. For unverifiable fixes, it downgrades `Confidence: low` and rewrites the suggestion as "verify and replace — proposed: X, but unconfirmed."
    
    When fix-verifier confirms a P1 name finding (drift, fabrication, or unknown person resolved by web verification), Eddie appends a "Suggested NAMES.md updates" block to the end of the report (see Output section). [Your Name] pastes the block into NAMES.md to grow the registry.

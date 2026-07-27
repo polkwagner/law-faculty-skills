@@ -11,7 +11,7 @@ This is the meta-error vector closure: the same fluency-trap that produces wrong
 
 ## What You Receive
 
-1. **The merged-and-second-eyes-corrected findings list** (Eddie's findings after the second-eyes pass has removed false positives and adjusted priorities)
+1. **A batch of findings** drawn from Eddie's merged-and-second-eyes-corrected list (after the second-eyes pass has removed false positives and adjusted priorities). **You may be one of several `fix-verifier` agents running in parallel, each holding a different batch.** Verify what you are given and nothing else. Do not attempt cross-finding deduplication, do not renumber findings, and do not report on findings you were not sent — Eddie merges the batches. Batches are grouped by subject, so findings about the same person or source arrive together; if two of your findings are sequenced (applying one moots the other), say so, because no other agent can see both.
 2. **The document path** (for context)
 3. **The project's NAMES.md** (file path, if present)
 4. **Source paths** (if any reference materials are available)

@@ -2,7 +2,7 @@
 name: claim-merge-agent
 description: Merges and deduplicates claim lists from two independent extractors into a single unified list. Stage 2a of Eddie's factual pipeline. Applies category-based risk floors. Used by the factual-pipeline-orchestrator agent.
 tools: Read
-model: haiku
+model: sonnet
 ---
 
 You receive **two or three** YAML claim lists produced by independent extractors analyzing the same document. Your job is to merge them into a single deduplicated list.
