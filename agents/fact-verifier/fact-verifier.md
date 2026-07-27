@@ -88,25 +88,31 @@ When fetching a public URL, if the fetch times out or returns an error after exh
 
 ## Domain-Aware Web Fetching
 
-Many institutional sites return 403 errors on WebFetch. Follow these rules:
+**A 403 is a bot block, not a missing source. Never record `unverifiable` on a 403 alone.**
 
-**Known-blocked domains — skip WebFetch, use the fetch script directly:**
+This matters more than it sounds. Law-school and university sites block WebFetch by default, and those are exactly the pages that settle the personnel and affiliation claims this agent exists to check. A verifier that reads 403 as "source inaccessible" produces a systematic false negative on its highest-value claims — and reports it as a clean result.
 
-For `.edu` domains (all of them), `americanbar.org`, and any site that has returned a 403 in this session:
+**Known-blocked domains — skip WebFetch entirely and fetch with a browser user-agent.** This covers every `.edu` domain, `americanbar.org`, and any host that has already returned a 403 this session:
 
 ```bash
-bash ~/code/claude-sync/scripts/webfetch.sh "URL" 30000
+curl -sS -L --max-time 20 --compressed \
+  -A 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36' \
+  -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+  -H 'Accept-Language: en-US,en;q=0.9' \
+  "URL" | sed 's/<[^>]*>//g' | sed '/^[[:space:]]*$/d' | head -c 30000
 ```
 
-**Other domains:** Try WebFetch first. If 403 or empty, retry once with the fetch script. If both fail, try alternative URLs.
+The user-agent header is the whole fix — `law.upenn.edu` returns 403 to a bare request and 200 to that one. Pipe through `pandoc -f html -t markdown --wrap=none` instead of `sed` if pandoc is installed; it produces far more readable output. If a local fetch helper is available (some installations have one), prefer it — but never depend on one being present, and never report a claim unverifiable because a helper script was missing.
 
-**Try alternative URLs before giving up.** If a faculty profile page is blocked:
-- Try the school's directory or people page
-- Try a LinkedIn profile
-- Try a news article mentioning the person's title
-- Try a cached version via web search
+**Other domains:** try WebFetch first. On 403, empty output, or a body containing "access denied", "captcha", "cloudflare", "just a moment", or "verify you are human", retry once with the curl command above.
 
-A single 403 is NOT grounds to mark a claim unverifiable. Only mark unverifiable after exhausting alternatives.
+**Exhaust alternatives before giving up.** If a faculty profile page is blocked:
+- The school's directory, people, or faculty-index page — for a "is this person on the faculty" question, the enumerated directory is *better* evidence than a single profile, because it settles absence as well as presence
+- A LinkedIn profile
+- A news article, press release, or event page naming the person's title
+- A cached copy via web search
+
+**Absence must be earned.** For a personnel claim, "not found" is only reportable after checking the institution's own enumerated directory. Absence from general search results is not evidence; absence from the institution's own complete listing is. Word the finding as "unverifiable as [institution] faculty" rather than "fabricated" — absence from a roster is what you established, and it is enough to require removal without asserting the person does not exist.
 
 ## Output Format
 
