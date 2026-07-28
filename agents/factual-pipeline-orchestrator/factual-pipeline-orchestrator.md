@@ -139,14 +139,16 @@ Collect all verification results.
 
 Once Stage 2b returns, launch both branches in the same wave:
 
-- **Branch A:** Stage 3 (coverage audit) and any gap verification it triggers.
+- **Branch A:** Stage 3 (coverage audit), then immediately its gap verification.
 - **Branch B:** Stage 4a (adversarial re-verification) over the Stage-2-derived selection.
+
+**Branch A runs straight through — its gap verification is not gated on Branch B.** The moment the coverage auditor returns, spawn the gap-verification batches. Do not hold them for the A/B join. A measured run finished the auditor in ~42s and then left Branch A idle ~217s waiting on B before verifying the gaps, which converted a concurrent branch back into a serial one.
 
 Join both branches before Stage 4b.
 
-At **aggressive** intensity only, coverage-audit claims also belong in the re-verification set. Do not serialize the whole stage for them — run Branch B as above on the Stage-2-derived claims, then spawn one additional Stage 4a wave for the gap claims after Branch A returns.
+**At aggressive intensity, the gap re-verification wave fires on the auditor's output, not on Branch A's completion.** Coverage-audit claims belong in the re-verification set, and Stage 4a takes claim *text and location only* — it never consumes verification results. So the gap wave's sole dependency is the coverage auditor's claim list, which arrives early. Spawn it as a third concurrent branch the moment the auditor returns; do not wait for gap verification, and do not wait for Branch A. In the measured run this wave ran serially after the join and added 128s to the critical path for no dependency that exists.
 
-Both branches are web-bound. Running them in sequence roughly doubles the slowest part of the pipeline for no gain.
+All three branches are web-bound. Running any of them in sequence adds their full duration to the critical path for no gain.
 
 ### Stage 3: Coverage Audit
 

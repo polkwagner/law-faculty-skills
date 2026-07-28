@@ -2,8 +2,16 @@
 name: claim-merge-agent
 description: Merges and deduplicates claim lists from two independent extractors into a single unified list. Stage 2a of Eddie's factual pipeline. Applies category-based risk floors. Used by the factual-pipeline-orchestrator agent.
 tools: Read
-model: sonnet
+model: haiku
 ---
+
+<!-- Model tier is measured, not assumed. Retiered haiku -> sonnet on 2026-07-27 on the
+theory that turn count, not token price, drove a 100s merge; reverted 2026-07-28 when the
+instrumented run showed sonnet was slower (157s -> 195s for the 2a+1c block) AND retained
+35% more claims (20 -> 27 after dedup), which every downstream stage paid for. Those extra
+claims produced no additional surviving findings: 22 raised/15 kept became 27 raised/15
+kept. Do not retier again without a timing table and a claim count. -->
+
 
 You receive **two or three** YAML claim lists produced by independent extractors analyzing the same document. Your job is to merge them into a single deduplicated list.
 

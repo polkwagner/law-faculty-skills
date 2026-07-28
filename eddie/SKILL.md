@@ -174,7 +174,7 @@ The pre-flight output is purely informational — it does NOT block the run exce
 2. **Identify document type** — email, memo, proposal/report/document, academic writing, slides, or other.
 3. **Parse tuning** — determine intensity level from invocation arguments.
 4. **Use planning artifacts from pre-flight** — The pre-flight check (above) discovered planning artifacts. If `plan=<path>` was passed in invocation arguments, use those (overriding auto-discovery). Otherwise use whatever pre-flight surfaced. If artifacts were found, they become inputs to Agent 5 (Plan Reconciliation) below. If none exist, skip Agent 5.
-5. **Dispatch parallel review agents** — Launch the following reviews concurrently. Each agent receives the full document text (file path), the intensity level, and its specific review mandate:
+5. **Dispatch parallel review agents** — **Every agent below goes out in ONE dispatch, in a single message, including Agent 1.** Agent 1 (`factual-pipeline-orchestrator`) is described first and takes the longest — 10× the others — so it is the one that must not be held back. Dispatching Agents 2-5 first and Agent 1 in a following turn adds Agent 1's *entire* runtime to the critical path while the others sit finished: a measured run lost ~800s of a 2588s total to exactly that, turning a 1171s wave into 2050s. If you have written out Agents 2-5 and are about to send, stop — Agent 1 belongs in the same message. Each agent receives the full document text (file path), the intensity level, and its specific review mandate:
 
    **Agent 1 — Factual & Citation Review:**
    If the `factual-pipeline-orchestrator` agent is available, spawn it and pass it:
@@ -271,7 +271,12 @@ The pre-flight output is purely informational — it does NOT block the run exce
    Batching, in order:
 
    1. **Group by subject first.** Findings about the same person, statistic, or source belong in one batch — they share web lookups, and splitting them makes two agents fetch the same faculty page. Subject grouping also keeps dependent findings together: when one finding proposes removing a name and another proposes a title for that same name, the second is moot if the first is applied, and only a single agent seeing both can say so.
-   2. **Then apply the width rule to the groups.** Fewer than 6 groups: one agent. Six or more: `ceil(N / 5)` agents, minimum 2. Never let a single agent take the whole set just because it fits.
+   2. **Then split on lookup cost, not on group count.** Score each group by the number of *independent* sources an agent must consult to verify it: a registry hit scores 0, a single faculty page scores 1, a six-year statistical series scores 6. Then:
+      - Any group scoring **3 or more gets its own agent**, however few groups there are.
+      - Bundle the remainder so no agent carries more than ~3 estimated fetches.
+      - **Never one agent when the total estimated fetches across all groups is 4 or more.**
+
+      Counting groups instead of fetches is the trap: a measured run produced five groups, fell under a six-group threshold, and ran as a single agent — while one of those five groups was pulling six ABA reports by itself and accounted for most of the hop. Five cheap groups and five expensive ones are not the same problem, and group count cannot tell them apart.
 
    Pass every batch:
    - Its assigned findings, from the list as updated by second-eyes (after removals and priority adjustments, including any new findings second-eyes added)
