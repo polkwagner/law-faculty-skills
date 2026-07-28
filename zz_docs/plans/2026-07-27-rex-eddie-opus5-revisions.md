@@ -1065,3 +1065,47 @@ If you need to trim, the cheapest cut is `clean.md` at Checkpoint A — the `voi
 - **Eddie's four-stage factual pipeline.** The Opus 5 guidance to delete verification scaffolding targets *self*-verification instructions. `adversarial-reverifier`, `coverage-auditor`, and `fix-verifier` run in independent contexts, where fresh-context verifiers still outperform self-critique.
 - **Reducing the `adversarial-reverifier` sample rate.** Plausible cost saving, but it trades away the pipeline's independent-check property. Separate decision, separate evidence.
 - **Three-run baselines for statistical confidence in count deltas.** Roughly doubles cost. This plan gates on named expectations instead. Revisit if count drift becomes a recurring source of false alarms.
+
+---
+
+# Outcomes (closed 2026-07-28)
+
+Merged to `main` and completed. Five instrumented eddie runs on `personnel-drift.md`, all aggressive intensity.
+
+## Performance
+
+| | Run 2 | Run 3 | Run 4 | Run 5 |
+|---|---|---|---|---|
+| Total | 1992s | 2588s | **1519s** | 1706s |
+| FPO pipeline | 881s | 1093s | **723s** | 1029s |
+| Claims after dedup | 20 | 27 | 15 | 15 |
+
+Four fixes produced the run-4 result: dispatching Agent 1 in the same wave as Agents 2-5 (run 3 lost ~800s to a second-turn dispatch), width-based batching in Stages 2b/4a (2.5x per-claim on 4a), fetch-cost batching in fix-verification (400s to 227s), and Branch A/B concurrency.
+
+**The most useful result was a null one.** Stage 2a merge does not scale with claim count: 46 in / 15 out at 275s against 43 in / 15 out at 156s. Four measurements of that stage read 157s (haiku), 195s (sonnet), 156s (haiku), 287s (haiku) — haiku's own spread is wider than any model-tier effect measured anywhere in the pipeline. Rounds 4 and 5 were therefore tuning inside the measurement error in both directions, and the sonnet revert's timing justification was noise (its claim-retention justification stands: sonnet kept 27 claims for zero additional surviving findings). Recorded in `claim-merge-agent`'s frontmatter comment with all four data points, because the trap regenerates: see 275s, swap the tier, get 156s, conclude you fixed it.
+
+This vindicates the last "out of scope" bullet above. Single-run count and timing deltas on this pipeline are not evidence.
+
+## Correctness — the more valuable half
+
+Not in the original plan; all five discovered by running it.
+
+- **Name laundering.** Extraction splits "[wrong first name] [surname], Executive Director" into separate name and title claims; the title verifies clean on its own, the registry rule never fires because no name is in front of it, and the claim returns `confirmed`. Measured: Stage 2 returned `confirmed` on four such claims where Stage 4a returned `contradicted`. Stage 4 is skipped at moderate intensity, where nothing would catch it. Fixed in `fact-verifier`: verify the pairing, never the title alone; never substitute a corrected name and then verify.
+- **Primary sources.** Five of nine claims flipped `unverifiable` to `contradicted` on re-verification purely because Stage 4a opened an ABA 509 filing Stage 2 never did. The 509 report is now named in `fact-verifier` with its generator URL.
+- **403 vs JS shell.** Two distinct failures with one symptom, and the first version of this guidance was wrong in the other direction ("never conclude a site is JS-gated"). A positive control separates them; curl-accessibility is a property of an endpoint, not a domain.
+- **Registry provenance.** `eddie-second-eyes` asserted a name appeared in neither registry having read one.
+- **Priority inflation is structural**, not accidental — take-the-higher on merge means any disagreement lands at the higher tier by rule. Disagreements are now carried forward so second-eyes adjudicates instead of re-deriving.
+
+## Privacy incident
+
+Found while reading `lessons.md` for unrelated reasons: eight third-party names in published output, including three students, one paired with transcript characteristics. Separately, the plan file above had published two real-name-to-replacement pairs outright — a decoder ring that reverses the scrub wherever those replacements appear.
+
+Root cause is structural and worth remembering: `SCRUB_RULES` is comprehensive for one person and automatic; third-party names depend on a human adding each one to a private JSON file, with no detection when they forget. The post-scrub verifier only checks strings *derived from the rules*, so a name nobody added is a name nobody checks — it verifies that known secrets stayed out, never that unknown ones did not get in.
+
+Resolved: names scrubbed, decoder ring rewritten, seven scrub rules added (private strings 41 to 49), and history rewritten with `git filter-repo` across 45 commits after verifying the tip was byte-identical. Zero forks. Old SHAs remain fetchable from GitHub until it garbage-collects.
+
+## Still open
+
+- **The gap-wave concurrency fix has never executed.** Three runs, zero coverage-audit gaps. The A/B join is confirmed; that branch is not. Needs a fixture built to provoke gaps.
+- **The extractor retier** (`factual-reviewer`, `institutional-claim-extractor` on opus) was deliberately never attempted. It is the one change whose regression is invisible — reduced extraction recall looks exactly like a clean document — so it needs a findings-comparison run, not a timing run.
+- **A publish-time guard for unregistered proper nouns.** Would have caught the leak six weeks earlier. Noisy at first, then quiet.
