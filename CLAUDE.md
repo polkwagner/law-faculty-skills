@@ -40,7 +40,7 @@ python3 law-mcq-generator/validate_mcq.py exam.docx answer_key.docx
 # Extract comments from Word documents (stdlib only, no pip deps)
 python3 docx-comment-summary/scripts/extract_comments.py file1.docx [file2.docx ...] [-o output.md]
 
-# Run an eddie regression fixture (black-box — diff the report against eddie/tests/fixtures/expected.md)
+# Run an eddie regression fixture (black-box — diff the report against eddie/tests/expected.md)
 /eddie skills/eddie/tests/fixtures/<fixture>.md be aggressive lessons=skills/eddie/tests/lessons.md
 ```
 
@@ -164,7 +164,7 @@ Several directories exist locally (as source skills or private skills) but are g
 Eddie is an LLM document-reviewer, so it's tested as a black box, not with assertions. `eddie/tests/` ships as published content (it's in source `~/.claude/skills/eddie/`, so it survives `copy_tree`):
 
 - `tests/fixtures/*.md` — input documents, each engineered to provoke specific catches (personnel drift, misattributed affiliations, fabricated citations, a clean control).
-- `tests/fixtures/expected.md` — the validation reference: the P1/P2 findings each fixture *should* produce. Exact wording varies; check category and priority.
+- `tests/expected.md` — the validation reference (kept OUT of `fixtures/` so review agents reading the input directory cannot find the answer key): the P1/P2 findings each fixture *should* produce. Exact wording varies; check category and priority.
 - `tests/NAMES.md` — the test name registry (auto-discovered by the orchestrator's tree walk). `tests/lessons.md` — test calibrations, passed via the `lessons=` invocation arg so they don't touch the real user-global lessons file.
 - `templates/NAMES.md.template` — scaffolding the skill offers when a project has no name registry.
 

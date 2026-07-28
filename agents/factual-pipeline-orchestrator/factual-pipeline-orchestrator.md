@@ -32,6 +32,7 @@ Two rules that keep the numbers honest:
 
 - **Branch A and Branch B run concurrently, so their durations overlap.** Report each branch's own elapsed time, and report the wave's wall-clock as the max of the two, not the sum. A timing table that sums concurrent branches will make a working pipeline look slower than a broken one.
 - **Record the fan-out width alongside the duration** — how many `fact-verifier` batches Stage 2b spawned, how many `adversarial-reverifier` batches Stage 4a spawned. A stage that took 90s across 6 batches and one that took 90s in a single agent are different problems.
+- **Stage 2a reports size, not width.** It is a single agent with no parallelism available, so its fan-out column carries `N in → M out` instead: the total claims received across all extractor lists, and the count after dedup. Stage 2a has measured as the second-slowest stage in the pipeline while doing nothing but text dedup, and the open question is whether its cost scales with input claims or is a fixed floor. Three runs recording `in → out` beside the duration answer that; none of them can be reconstructed afterward, because the input count appears nowhere else in the output.
 
 Emit the table at the end of your output (see Consolidating Output below). Never skip timing because a run was fast, and never estimate a duration you did not measure — omit it and say so.
 
@@ -88,7 +89,7 @@ Spawn the **`claim-merge-agent`** with all three claim lists (general from `fact
 
 If `quote-extractor` was unavailable, pass two lists; claim-merge-agent handles two-list input gracefully.
 
-Record the merged claim count.
+Record the claim count of **each input list separately**, their total, and the merged output count. The total-in and merged-out figures go in the Stage 2a row of the timing table as `N in → M out`.
 
 ### Stage 1c: Named-Person Registry Check (if registry was found)
 
@@ -260,7 +261,7 @@ Emit the measured timings (see Stage Timing above) as the last block of your out
 |---|---|---|
 | Pre-checks | Ns | — |
 | Stage 1 — extraction | Ns | 3 agents ∥ |
-| Stage 2a — merge | Ns | 1 |
+| Stage 2a — merge | Ns | N in → M out |
 | Stage 1c — registry | Ns | inline |
 | Stage 2b — verification | Ns | N batches ∥ |
 | Stage 3 — coverage (Branch A) | Ns | 1 + N gap batches ∥ |

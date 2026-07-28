@@ -1,5 +1,24 @@
 # Eddie v2 Regression Fixtures — Expected Catches
 
+> **This file lives in `tests/`, not `tests/fixtures/`, deliberately.** It is the answer key, and
+> it used to sit in the same directory as the inputs. On 2026-07-27 `eddie-consistency-checker`
+> found it, read it, and cited it in its own findings — "confirms these three are the fixture's
+> intended catches" — which made that agent's calls on all three names worthless as independent
+> evidence. The other agents were told not to read it and did not, so that run's headline results
+> survived, but the only defense was a line in the dispatching prompt. Keeping the key out of the
+> input directory is the structural fix. **Do not move it back, and do not put fixture inputs in
+> `tests/` alongside it.**
+
+> **The test registry is deliberately incomplete.** Two runs have proposed adding people to
+> `tests/NAMES.md` — a curricular director (2026-07-27) and a fabrication row for the invented
+> name in `personnel-drift.md` (2026-07-28). Both were declined, for the same reason each time:
+> the *absence* is what the fixture tests. The missing curricular director is what forces
+> fix-verification to drop an unsupported attribution rather than resolve it to a plausible
+> name — the exact behavior worth testing. Registering the fabricated name would turn a catch
+> that currently costs a 400-record directory enumeration into a free registry lookup, retiring
+> the enumeration path from the suite entirely. A registry containing every answer tests only the
+> registry. Before adding anyone here, ask which behavior their absence is currently forcing.
+
 Manual validation reference. After running `/eddie` against each fixture (with `skills/eddie/tests/NAMES.md` auto-discovered by the orchestrator's tree walk, and `skills/eddie/tests/lessons.md` passed via the `lessons=` invocation arg — full command: `/eddie skills/eddie/tests/fixtures/<fixture>.md be aggressive lessons=skills/eddie/tests/lessons.md`), the report should contain at least the catches listed below. Exact wording will vary; check for category and priority.
 
 ## personnel-drift.md
