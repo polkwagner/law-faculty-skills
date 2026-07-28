@@ -40,6 +40,18 @@ The registry takes precedence because personnel errors in internal institutional
 
 Search the web for authoritative sources. Prefer official institutional pages, government databases, and court records over secondary sources.
 
+**Know the primary source for the claim's domain, and go there first.** An institution's own program pages and press releases describe programs; they rarely publish the numbers. Stopping there yields `unverifiable` on claims a mandated disclosure would have settled outright — a measured run had five of nine claims flip from `unverifiable` to `contradicted` on re-verification, every one because the re-verifier reached a filing the first pass never opened.
+
+For **any claim about a US law school's enrollment, clinic seats, field placements, or JD headcount**, that source is the ABA Standard 509 Information Report. Schools must file annually and the reports are public:
+
+```
+backend.abarequireddisclosures.org/api/AnnualQuestionnaire/GenerateIndividualDisclosure509Report?schoolId=NNN&year=YYYY
+```
+
+Penn Carey Law is `schoolId=130`. Three cautions: pull **multiple years**, because a single report gives one year and most claims are comparative; read the **row label**, not just the number, because labels drift between editions and the same figure appears under different meanings across years; and check the **unit** — "positions filled" is not a headcount, and a student in two placements counts twice.
+
+`unverifiable` is only honest after the domain's primary source has been checked. Absence from secondary coverage is not absence from the record.
+
 ### Source-Document Claims (quotes, interview attributions, cited reports)
 
 If source document paths were provided, check whether the cited source exists and says what the document claims.
@@ -120,7 +132,12 @@ The user-agent header is the whole fix — `law.upenn.edu` returns 403 to a bare
 
 **Other domains:** try WebFetch first. On 403, empty output, or a body containing "access denied", "captcha", "cloudflare", "just a moment", or "verify you are human", retry once with the curl command above.
 
-**"JS-rendered" is a misdiagnosis, not a finding.** A 403 body, an empty WebFetch result, or a page that looks like a shell is not evidence of client-side rendering — it is the same bot block described above wearing a different name. `law.upenn.edu` is server-rendered and curl-accessible: the faculty directory returns ~130 KB of complete HTML to the browser-user-agent command above, and enumerates fully via `/faculty/directory/?factype=<category>` across its nine appointment categories. Never conclude a site is JS-gated without first trying curl with the browser user-agent, and never generalize that conclusion to a whole domain.
+**A 403 is never evidence of JS rendering — but some endpoints genuinely are JS shells, and the control query is how you tell them apart.** These are two different failures with the same symptom, and confusing them in either direction produces a false negative:
+
+- **A 403, an empty WebFetch result, or a blocked-looking body** is the bot block described above. Retry with the browser user-agent before concluding anything.
+- **An endpoint that returns HTTP 200 with zero hits for *every* name, including one you know is listed**, is a client-side-rendered shell. No user-agent fixes that; you need a different endpoint.
+
+The positive control separates them, which is why it is not optional. On `law.upenn.edu`, `/faculty/` is a JS shell — 200 and zero hits for every name — while `faculty/directory.php` with the nine `?factype=` category views is server-rendered and enumerates completely (~400 records). Both live on the same host, so "this domain is curl-accessible" is not a property you can establish once and reuse; establish it per endpoint, with a control.
 
 **Run a control query before reporting a null.** When a search or directory lookup returns nothing for the name you are checking, issue the same query against a name you know is present. If the control also returns nothing, your query or endpoint is broken and the null is meaningless. If the control returns results, the null is real and reportable. One extra call converts "I found nothing" into evidence.
 

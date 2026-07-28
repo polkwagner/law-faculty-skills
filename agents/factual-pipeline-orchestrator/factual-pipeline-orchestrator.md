@@ -158,10 +158,16 @@ Spawn the **`coverage-auditor`** with:
 - The document path
 - The full merged claim list with verification results
 
-If the coverage auditor finds gaps (new claims), send them through Stage 2b verification:
-- Filter by intensity (same rules as above)
-- Batch and `fact-verifier` agent (if available)s for the new claims
-- Add verified gap claims to the main results
+**The instant the coverage auditor returns, spawn everything its output feeds — do not wait for Branch B, and do not wait for the A/B join.** Branch B typically runs 3-4× longer than the auditor. A measured run had the auditor finish at 53s while Branch B ran to 218s, then did all of the following *after* the join: ~165s of available concurrency spent idle for no dependency.
+
+If the coverage auditor finds gaps (new claims), spawn both of these immediately and concurrently:
+
+1. **Gap verification** — filter by intensity (same rules as above), batch per the Batching Rule, `fact-verifier` agent (if available)s. Add verified gap claims to the main results.
+2. **Gap re-verification, aggressive intensity only** — batch the gap claims per the Batching Rule and `adversarial-reverifier` agent (if available)s. This wave takes claim text and location only; it does **not** consume the gap verification results from (1), so it must not wait on them.
+
+Neither of these is downstream of Branch B. If you find yourself holding them until Stage 4a's batches return, stop — nothing in either one reads Stage 4a's output.
+
+If the auditor finds no gaps, Branch A is complete at that point.
 
 ### Stage 4: Adversarial Re-verification
 
