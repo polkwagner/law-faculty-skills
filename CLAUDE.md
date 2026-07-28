@@ -73,6 +73,46 @@ copy targets the pip-installed `materials-convert` command.
 > (regenerable via `publish.py` from `~/.claude` source), so a tangled local history is
 > disposable — prefer realigning to `origin/main` and re-deriving over untangling parallel commits.
 
+### Never switch branches in the working tree
+
+Git assumes it owns the working tree. Dropbox does not know branches exist and re-syncs file
+contents on its own schedule, so a `checkout` can be silently undone seconds after it reports
+success. Observed 2026-07-28: `git checkout main` succeeded and `git status` reported a clean
+tree; by the next command the working tree held the *other branch's* file contents while HEAD
+still said `main`, and `git status` showed twelve modified files. A `git add` + `commit` there
+would have put an entire feature branch onto `main` as one commit.
+
+`git status` can lie in the direction of a clean tree, which is the direction that gets you to
+commit. Treat a clean-tree report immediately after a checkout as unverified.
+
+**To put a commit on a branch you are not standing on, never check it out — build the commit
+from the object database, which Dropbox does not touch:**
+
+```bash
+S=/tmp/scratch   # anywhere outside the repo
+git cat-file -p main:path/to/file > $S/orig        # read the target branch's blob
+#   ... transform $S/orig into $S/new ...
+NEWBLOB=$(git hash-object -w $S/new)
+export GIT_INDEX_FILE=$S/tmpidx                    # temp index; never touches the real one
+git read-tree main
+git update-index --cacheinfo 100644,$NEWBLOB,path/to/file
+TREE=$(git write-tree)
+COMMIT=$(git commit-tree $TREE -p main -F $S/msg.txt)
+git diff --stat main $COMMIT                       # verify BEFORE moving the ref
+git update-ref refs/heads/main $COMMIT             # safe: main is not checked out
+git push origin main
+```
+
+Verify with `git diff --stat main $COMMIT` before `update-ref`. If it lists a file you did not
+intend to touch, the tree is wrong — discard the commit object and start over; nothing has moved
+yet.
+
+Two related habits: confirm a branch is fully pushed (`git rev-parse <branch>` equals
+`git rev-parse origin/<branch>`) before any `checkout -f`, so a forced tree reset cannot lose
+work. And prefer a byte-count or substitution-count check over eyeballing a diff — the tell that
+caught the 2026-07-28 near-miss was a transform script reporting zero replacements on a file that
+provably contained six, because it had read the wrong branch's copy.
+
 ## Publish Pipeline
 
 `scripts/publish.py` syncs from the maintainer's `~/.claude/skills/` and `~/.claude/agents/`:
