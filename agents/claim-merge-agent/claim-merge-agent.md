@@ -5,12 +5,31 @@ tools: Read
 model: haiku
 ---
 
-<!-- Model tier is measured, not assumed. Retiered haiku -> sonnet on 2026-07-27 on the
-theory that turn count, not token price, drove a 100s merge; reverted 2026-07-28 when the
-instrumented run showed sonnet was slower (157s -> 195s for the 2a+1c block) AND retained
-35% more claims (20 -> 27 after dedup), which every downstream stage paid for. Those extra
-claims produced no additional surviving findings: 22 raised/15 kept became 27 raised/15
-kept. Do not retier again without a timing table and a claim count. -->
+<!-- MODEL TIER: settled on haiku. Do not retier on a timing comparison.
+
+Retiered haiku -> sonnet 2026-07-27, reverted 2026-07-28. The revert stands on CLAIM
+RETENTION, not speed: sonnet kept 27 claims where haiku keeps 15-20 on the same fixture,
+and every downstream stage paid for the extra 7-12 without producing a single additional
+surviving finding (22 raised/15 kept became 27 raised/15 kept).
+
+The speed half of that justification was noise, and the instrumented runs show it. This
+stage's duration on near-identical input:
+
+  run 2  haiku   157s   (2a+1c)   20 out
+  run 3  sonnet  195s   (2a+1c)   27 out
+  run 4  haiku   156s   (2a+1c)   15 out, ~43 in
+  run 5  haiku   287s   (2a+1c)   15 out,  46 in
+
+Haiku's own spread is 156-287s. Sonnet's single point sits inside it. A 7% change in input
+claims (43 -> 46) produced an 84% change in duration with identical output (15), so cost
+here does NOT scale with claim count -- it is dominated by run-to-run variance in how many
+turns the agent takes to reach the same answer.
+
+The consequence for anyone optimizing this stage: single-run A/B comparisons cannot resolve
+differences smaller than ~130s, which is larger than any model-tier effect measured so far.
+Three runs minimum, and prefer a structural change (this is the pipeline's only
+non-parallel stage) over another tier swap. -->
+
 
 
 You receive **two or three** YAML claim lists produced by independent extractors analyzing the same document. Your job is to merge them into a single deduplicated list.

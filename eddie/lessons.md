@@ -95,6 +95,12 @@ go under "Project-specific" with the project name.
 
   - **"Penn Carey Law" is the institution's own standard short form and is fine on first reference** in internal documents — do not require the full "University of Pennsylvania Carey Law School." Flagging it invents a house rule that does not exist.  (2026-07-28, personnel-drift fixture)
 
+  - **Attributing a statistic to the head of the office that owns the number is adequate sourcing in a short internal update** — do not flag it as "unsourced" absent a reason to doubt the figure itself. If the figure is wrong, that is the finding; "who said it" is not a second defect.  (2026-07-28, personnel-drift fixture)
+
+  - **"X's office" is acceptable shorthand for a named person's organizational unit once that person's role has been given.** Do not require the unit be formally named, or its staff enumerated, or a supervisor identified. Cleared on this fixture three runs running.  (2026-07-28, personnel-drift fixture)
+
+  - **Before flagging "identical sentence template across paragraphs," check the syntactic position of the repeated element in each sentence.** A shared name-title appositive appearing as subject, then object, then participial modifier is not a repeated template — it is the ordinary convention for introducing people. The tell requires structural repetition, not a recurring *kind* of phrase. Watch for the self-contradiction that exposes this one: a report flagging three sentences as identical while separately flagging one of them for differing from the other two has refuted itself.  (2026-07-28, personnel-drift fixture)
+
 ## Project-specific
 
 **JD Concentrations** (`Deputy Dean Background Materials/.../Curricular Items/JD Concentrations`)

@@ -15,3 +15,6 @@ ip-problems/
 class-prep-skill/
 polk-zotero/
 **/design.md
+
+# Eddie run reports — saved to CWD by the skill, never a repo artifact
+Eddie_Review_*.md

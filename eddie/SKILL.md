@@ -241,7 +241,9 @@ The pre-flight output is purely informational — it does NOT block the run exce
    - For each finding, quote the relevant plan language and the corresponding (or missing) output language.
    - Return findings as prioritized revision entries. Omissions of planned content are typically Priority 2 (High). Contradictions of planned content are Priority 1 (Critical).
 
-6. **Merge and deduplicate** — Combine all agent results. Remove duplicates (same text flagged by multiple agents). When agents disagree on priority, use the higher priority.
+6. **Merge and deduplicate** — Combine all agent results. Remove duplicates (same text flagged by multiple agents). When agents disagree on priority, use the higher priority — **and record the disagreement on the finding** as `Priority disagreement: <agent A> P<n> / <agent B> P<m>; merged at P<n>`.
+
+   Take-the-higher is the right default because it fails safe, but it makes priority inflation *structural* rather than accidental: any finding two agents score differently arrives at the higher tier by rule, not by judgment. A measured run had five findings inflated this way and second-eyes reversed four — re-deriving from scratch each time, because the merge had already discarded the lower score. Carrying both numbers forward turns that into adjudication: second-eyes sees that one agent read the finding as P4 and can weigh it, rather than inferring a disagreement existed. Where no agent disagreed, omit the line — its absence is itself information.
 7. **Fact verification** — *Removed.* Verification is now built into the factual pipeline orchestrator (Agent 1). No separate dispatch needed.
 8. **Identify patterns** — Look across all findings for recurring issues that suggest systemic problems rather than one-off mistakes.
 9. **Second eyes** *(runs by default at moderate and aggressive; skipped at light or if `skip second-eyes` / `skip second read` / `no second eyes` specified)* — Dispatch the **`eddie-second-eyes`** agent. Pass it:
