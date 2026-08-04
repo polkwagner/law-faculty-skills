@@ -93,6 +93,18 @@ These two exist to prove the pipeline surfaces marginal findings and clears them
 - **eddie-second-eyes should clear the second "ensure"** via the test lessons.md calibration ("'ensure' is acceptable when used in a quoted policy"). The cleared item should appear in the "Considered but cleared" section with the lesson cited as the reason.
 - "Maya Calloway" and "Diane Holloway" appear and match the registry — should pass Stage 1c without flag.
 
+## static-site.md
+
+- **P1 — static website** — The public link to `docs/accommodations.xlsx` exposes confidential accommodation information and must be removed or moved behind approved access control.
+- **P2 — static website** — The text calls a Fall 2025 guide definitive for Fall 2026 courses; flag the stale semester claim.
+- **P2 — static website** — The `example.invalid` external destination is not a usable resource link.
+- **P3 — static website** — "Read more" is non-descriptive link text. The internal hash link itself should be checked, but not called broken solely because the fixture cannot prove the target page's markup.
+
+## completed-plan.md
+
+- A completed historical plan must be excluded from automatic plan reconciliation unless the user explicitly supplies it with `plan=`.
+- The review report should disclose that the artifact was ignored only when its exclusion changes plan-reconciliation confidence.
+
 ## Validation protocol
 
 Run for each fixture:
