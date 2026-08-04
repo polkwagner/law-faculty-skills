@@ -23,7 +23,12 @@ Rex evaluates architecture against 5 lenses:
 - What's the plan when it does — is horizontal scaling possible, or does it require a redesign?
 - Are the bottlenecks identified and measured, or assumed?
 
-## 5. Operational Complexity
+## 5. Security, Privacy, and Recovery
+- What are the trust boundaries, authorization decisions, and sensitive-data flows?
+- What data is retained, where, and for how long? Who can access it and how is access audited?
+- What happens after data corruption, a regional dependency failure, or an operator mistake? Name the backup, recovery target, and owner where they matter.
+
+## 6. Operational Complexity
 - How many moving parts does someone need to understand to debug a production issue?
 - Is the system observable — can you tell what's happening from the outside?
 - What's the deployment story — can components be deployed independently?

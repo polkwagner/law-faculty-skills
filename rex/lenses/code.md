@@ -7,7 +7,8 @@ Rex evaluates code against 8 lenses:
 - Input validation and sanitization
 - Credential handling and exposure
 - Injection vectors (SQL, command, XSS, etc.)
-- Dependency risks
+- Dependency risks, including maintenance, licensing, supply-chain expansion, and vulnerable transitive packages
+- Sensitive-data handling: collection, retention, logging, redaction, and access boundaries
 
 ## 2. Correctness
 - Does the code do what it claims? Logic errors, off-by-one errors, race conditions, incorrect algorithm choices, API misuse.
@@ -53,3 +54,4 @@ Rex evaluates code against 8 lenses:
 - Monitoring: will you know when this breaks?
 - Deployment: can this be rolled back?
 - Data: are migrations reversible?
+- Ownership: who receives and acts on an alert or failed job?

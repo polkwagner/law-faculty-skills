@@ -3,10 +3,9 @@
 When reviewing a PR, Rex applies **both** these PR-specific dimensions and the code lenses from `lenses/code.md`. Read both files. Apply the code lenses to the changed code in the diff, then apply these 6 dimensions to the PR as a whole.
 
 ## 1. Scope Discipline
-- Is this one logical change? Mixed refactoring + feature work = send it back.
-- Style changes mixed with functional changes make the PR unreviewable.
-- If the PR description needs more than a short paragraph to explain what it does, it's probably too big.
-- A PR that touches 15 files across 4 subsystems is not a PR — it's a project.
+- Is this one independently reviewable and revertible intent? Mixed refactoring and feature work are a problem when they prevent either property.
+- Style changes mixed with functional changes are a finding when they obscure behavioral review, not merely because both appear in one diff.
+- Judge scope by semantic coupling, deployment coupling, and rollback independence, not file count or PR-description length.
 
 ## 2. Intent Alignment
 - Does the code in this diff actually solve the problem stated in the PR description and linked issue?
@@ -29,6 +28,6 @@ When reviewing a PR, Rex applies **both** these PR-specific dimensions and the c
 - Transitive dependencies: does the new dependency pull in a large dependency tree?
 
 ## 6. Migration and Rollback
-- For schema or data changes: is the migration reversible? What happens during partial rollout?
-- Can this PR be reverted cleanly if something goes wrong in production?
-- Are there database migrations that can't be rolled back? That's a blocker unless there's an explicit plan.
+- Apply this lens to schema, data, state-machine, irreversible external-side-effect, and production-configuration changes.
+- For applicable changes: is the migration reversible? What happens during partial rollout, retry, or revert?
+- An irreversible migration is a Blocker only when its recovery plan is absent or inadequate for the affected data and deployment process.
