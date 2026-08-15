@@ -281,6 +281,23 @@ def strip_sections(text: str) -> tuple[str, list[str]]:
     return "\n".join(out) + "\n", changes
 
 
+def transform(text: str, is_markdown: bool) -> tuple[str, list[str]]:
+    """The full source -> published transform: section strip, then scrub.
+
+    Both copy_tree and check_sync_drift go through this, so the drift audit
+    can't disagree with what publish actually writes. Adding a step here
+    without routing it through both was how the audit started reporting
+    every file with an excluded section as a hand edit.
+    """
+    changes = []
+    if is_markdown:
+        text, section_changes = strip_sections(text)
+        changes.extend(section_changes)
+    text, scrub_changes = scrub_text(text)
+    changes.extend(scrub_changes)
+    return text, changes
+
+
 def scrub_text(text: str) -> tuple[str, list[str]]:
     """Apply all scrub rules to text. Returns (scrubbed_text, list_of_changes)."""
     changes = []
@@ -409,13 +426,10 @@ def copy_tree(src: Path, dst: Path, label: str, manifest: list[str], apply_renam
         dst_file.parent.mkdir(parents=True, exist_ok=True)
 
         if is_text_file(src_file):
-            text = src_file.read_text(encoding="utf-8")
-            changes = []
-            if src_file.suffix.lower() == ".md":
-                text, section_changes = strip_sections(text)
-                changes.extend(section_changes)
-            scrubbed, scrub_changes = scrub_text(text)
-            changes.extend(scrub_changes)
+            scrubbed, changes = transform(
+                src_file.read_text(encoding="utf-8"),
+                src_file.suffix.lower() == ".md",
+            )
             dst_file.write_text(scrubbed, encoding="utf-8")
             if changes:
                 manifest.append(f"  {rel} (scrubbed):")
@@ -557,7 +571,10 @@ def check_sync_drift() -> list[str]:
             dst_file = dst / rel
             if not dst_file.exists():
                 continue
-            expected, _ = scrub_text(src_file.read_text(encoding="utf-8"))
+            expected, _ = transform(
+                src_file.read_text(encoding="utf-8"),
+                src_file.suffix.lower() == ".md",
+            )
             actual = dst_file.read_text(encoding="utf-8")
             if expected != actual:
                 findings.append(f"{dest_name}/{rel} — in-repo edit will be overwritten by next publish")
