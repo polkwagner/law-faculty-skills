@@ -144,6 +144,11 @@ SCRUB_RULES = [
     (r"~/code/voice-feedback/approved/polk-voice-profile\.md",
      "~/.claude/skills/eddie/references/voice-profile.md"),
 
+    # Provenance note for the academic-register profile: cites a Box path and
+    # names the source papers. The register guidance stands on its own, so the
+    # attribution is dropped rather than rewritten.
+    (r"\s*Source profile: `[^`]*AI Law Lab[^`]*`\s*\(built from [^)]*\)\.", ""),
+
     # --- Email addresses ---
     (r"pwagner@law\.upenn\.edu", "your-email@law.upenn.edu"),
     (r"polk@polkwagner\.com", "your-email@example.com"),
@@ -452,7 +457,10 @@ PERSONAL_IDENTIFIER_TOKENS = ["Polk", "Wagner", "pwagner", "polkwagner", "polk@"
 
 # Infrastructure secrets that don't appear as SCRUB_RULES LHS (e.g. webhook id
 # prefixes, signed URLs). Kept explicit because the derivation walks patterns.
-EXTRA_PRIVATE_STRINGS = ["AKfycbw", "~/code/voice-feedback"]
+# "AI Law Lab" itself is deliberately not listed: it is a real, historically
+# accurate program name that may legitimately appear. The Box folder below it
+# is the private part.
+EXTRA_PRIVATE_STRINGS = ["AKfycbw", "~/code/voice-feedback", "AI Final Exam Project"]
 
 # Optional private scrub rules loaded from OUTSIDE the repo. Third-party real
 # names (colleagues, cited academics) that appear in source skills/fixtures must

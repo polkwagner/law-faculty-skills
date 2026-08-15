@@ -126,7 +126,7 @@ Identify the document type and apply additional checks:
 
 ### Academic register (papers, law-review articles, scholarly essays)
 
-When the document is a scholarly paper — first person, numbered sections (I/II/III), footnotes, a journal/SSRN target — [Your Name] writes in a distinct academic voice that **overrides several email/memo defaults**. Detect the register first; if academic, apply this section and relax the rules it names. Source profile: `…/AI Law Lab/AI Final Exam Project/Paper - Can AI Ace Your Exam/paper/voice-profile.md` (built from twelve of his papers, weighted to *Information Wants to Be Free* and *Poisoning the Next Apple?*).
+When the document is a scholarly paper — first person, numbered sections (I/II/III), footnotes, a journal/SSRN target — [Your Name] writes in a distinct academic voice that **overrides several email/memo defaults**. Detect the register first; if academic, apply this section and relax the rules it names.
 
 **Rule overrides — do NOT flag these in academic register:**
 - **Semicolons and em-dashes** are normal parts of [Your Name]'s academic voice. The tell is punctuation that is uniform, mechanical, ornamental, or absent where the argument calls for it—not the presence of either mark.
