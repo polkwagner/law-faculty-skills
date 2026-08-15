@@ -63,6 +63,10 @@ Look upward from the target for `NAMES.md`, `names_registry.md`, `zz_docs/NAMES.
 
 Load Eddie lessons from the active skill directory or an explicit `lessons=` path. Do not create a registry or lessons file during a review-only run. You may recommend a location if a recurring personnel error makes one useful.
 
+### Voice calibration
+
+For every voice/style pass, read `~/.claude/skills/eddie/references/voice-profile.md` before applying banned-phrase or AI-tell rules. Classify the document's genre and audience first. The canonical profile's positive rules and false-positive controls govern; the generic banned list is a screen, not a complete style standard. A finding must identify a concrete reader problem and provide a more natural [Your Name]-like replacement. Do not flag first-person judgment, measured concessions, semicolons, em-dashes, information-bearing parentheticals, or legitimate list parallelism merely because they occur.
+
 ### Planning Artifacts
 
 An explicit `plan=` is authoritative. Otherwise discover only artifacts that meet at least one of these conditions:

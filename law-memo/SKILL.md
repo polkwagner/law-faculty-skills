@@ -89,15 +89,24 @@ Paragraph with bottom border, `w:after="240"`:
 - Section headings: bold Cambria 12pt, `w:before="200" w:after="80"`
 
 ### Bullets
-Bullet character (•) with tab, hanging indent — never Word list bullets, never em-dash bullets:
+**Real Word list bullets** (changed 2026-08-13 — the old manual `•`-plus-tab approach is superseded). Never em-dash bullets.
+
+`law-memo_sample.docx` already ships the definitions this needs: `word/numbering.xml` defines `numId 1` as a `bullet` list whose level-0 marker is `●` at `w:left="720" w:hanging="360"`, and `styles.xml` carries a `ListParagraph` style. So cloning the sample gives you working lists with no numbering setup:
+
 ```xml
 <w:pPr>
+  <w:pStyle w:val="ListParagraph"/>
+  <w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>
   <w:spacing w:line="276" w:lineRule="auto" w:after="120"/>
-  <w:ind w:left="720" w:hanging="360"/>
 </w:pPr>
-<w:r>...<w:t>•	bullet text here</w:t></w:r>
+<w:r>...<w:t>bullet text here</w:t></w:r>
 ```
-For bold lead-in bullets, use separate runs: bullet+tab run, bold run (lead phrase), normal run (rest of text).
+
+Do **not** also emit a literal `•` or a leading tab — the list supplies both, and doing it by hand yields a doubled marker. Drop the manual `w:ind`; the numbering definition owns the indent.
+
+For bold lead-in bullets, keep the runs split: bold run (lead phrase), then normal run (rest of text). There is no longer a bullet+tab run.
+
+**If you are not cloning the sample**, verify `numbering.xml` exists and that `numId 1` resolves, or the bullets render as unmarked indented paragraphs. Fail loudly rather than silently falling back to the old `•` character.
 
 ### Tables
 Tables must not split across pages. After building any table, apply `cantSplit` to every row and `keepNext` to all paragraphs in every row except the last. See the law-document skill for the `prevent_table_split(table)` helper function. Call it after populating every table.
@@ -157,7 +166,7 @@ Before delivering any memo, scan the full text for common AI writing patterns an
 - **Cut filler:** "a wide range of," "a variety of," "taken together," "reflecting the breadth of," "in a structured way," "the larger point is"
 - **Vary or cut overused words:** "several" (if used more than once), "curated," "nuanced," "multifaceted"
 - **Watch for structural tells:** identical sentence patterns across bullets, trailing summary lists that restate what was just said, overwrought framing where plain language would do
-- **Em-dash limit:** 1-2 per page max in inline prose. Replace most with commas.
+- **Em-dashes and semicolons:** Both are normal parts of [Your Name]'s prose. Keep them when they clarify a relationship, interruption, or qualification. Revise only mechanical repetition, ornamental punctuation, or a sentence made harder to follow; do not apply a numerical limit.
 
 This check applies to every memo before delivery.
 
@@ -199,7 +208,7 @@ generate .docx files.
 - [ ] RE value is bold, with hanging indent (`w:left="1440" w:hanging="1440"`)
 - [ ] Horizontal rule after header (bottom border, sz=6, after=240)
 - [ ] Cambria 12pt throughout — NO Book Antiqua
-- [ ] Bullet character (•) with hanging indent, never Word list bullets
+- [ ] Real Word list bullets (`ListParagraph` + `numPr` → `numId 1`), no hand-written `•` or tab
 - [ ] Footer: italic Cambria 10pt "Page x of y." centered
 - [ ] Tone follows CLAUDE.md voice baseline (direct, active, no filler)
 - [ ] AI writing tell check passed (see section above)

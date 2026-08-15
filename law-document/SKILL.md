@@ -158,15 +158,25 @@ def prevent_table_split(table):
 Call `prevent_table_split(table)` after populating every table. For very large tables (20+ rows) that genuinely cannot fit on one page, Word will still break them at a row boundary — these properties ensure it never breaks mid-row.
 
 ### Bullets
-Bullet character (•) with tab, hanging indent — never Word list bullets, never em-dash bullets:
-```xml
-<w:pPr>
-  <w:spacing w:line="276" w:lineRule="auto" w:after="120"/>
-  <w:ind w:left="720" w:hanging="360"/>
-</w:pPr>
-<w:r>...<w:t>•	bullet text here</w:t></w:r>
+**Real Word list bullets** (changed 2026-08-13 — the old manual `•`-plus-tab approach is superseded). Never em-dash bullets.
+
+Since this skill builds with python-docx from a fresh `Document()`, use the built-in style. Verified 2026-08-13: python-docx's default template defines `ListBullet` with a `w:numPr` referencing `numId 1`, which resolves in `numbering.xml` to a level-0 `bullet` format. It renders as a proper round bullet with no numbering setup of your own:
+
+```python
+p = document.add_paragraph("bullet text here", style="List Bullet")
 ```
-For bold lead-in bullets, use separate runs: bullet+tab run, bold run (lead phrase), normal run (rest of text).
+
+Do **not** also write a literal `•` or a leading tab — the list supplies the marker, and adding one by hand doubles it. Do not set a manual `w:ind`; the numbering definition owns the indent.
+
+**Set the font on the runs explicitly.** `List Bullet` inherits from the template's defaults, not from this document's Cambria 12pt body style, so an untouched list paragraph can come out in the wrong face:
+
+```python
+for run in p.runs:
+    run.font.name = "Cambria"
+    run.font.size = Pt(12)
+```
+
+For bold lead-in bullets, add the paragraph with the list style, then append runs: a bold run (lead phrase) and a normal run (the rest). There is no longer a bullet+tab run.
 
 ### List Formatting Tips
 - **Colons after named entities in compressed lists.** When a bullet lists items about a named entity and the list items themselves contain commas, use a colon after the entity name: "Center (Smith and Jones): research, conferences, student fellowships." This avoids ambiguity.
@@ -261,7 +271,7 @@ relationships that cause Word to refuse to open the file.
 1. **Initialize with logo** — load and insert the Penn Carey Law logo as the first element (see Logo section above)
 2. Build the title block appropriate to document type
 3. Apply Cambria 12pt throughout — headings are bold same-size, not larger
-4. Bullet character (•) for unordered lists; Arabic numerals for ordered lists
+4. Real Word list bullets (`style="List Bullet"`) for unordered lists; Arabic numerals for ordered lists
 5. Add footer with page numbers on multi-page documents
 6. Save to `~/Downloads/` (CLI) or `/mnt/user-data/outputs/` (web)
 7. **Run the Post-Generation Validation** step (see below) before delivering
@@ -300,8 +310,8 @@ Before delivering any document, scan the full text for these common AI writing p
 - Overwrought framing where plain language would do ("spans every stage of the J.D. program" vs. "from all three class years")
 - Excessive parallel structure in prose (fine in bullet lists, robotic in paragraphs)
 
-**Em-dash overuse:**
-- More than 1-2 inline em-dashes per page signals AI. Replace most with commas. Keep em-dashes only for strong emphasis or to set off lists that contain commas.
+**Em-dashes and semicolons:**
+- Both are normal parts of [Your Name]'s prose. Keep them when they clarify a relationship, interruption, or qualification. Revise only mechanical repetition, ornamental punctuation, or a sentence made harder to follow; do not apply a numerical limit.
 
 This check applies to all output — documents, memos, emails, and any prose produced on the user's behalf.
 
@@ -387,7 +397,7 @@ correct generation.
 - [ ] Title block present and appropriate to document type
 - [ ] Section headings: bold, 12pt, `w:before="200" w:after="80"`
 - [ ] Body paragraphs: `w:line="276" w:after="160"`
-- [ ] Bullet character (•) with hanging indent; lists introduced by full sentences
+- [ ] Real Word list bullets (`style="List Bullet"`, runs set to Cambria 12pt); lists introduced by full sentences
 - [ ] Tables: `prevent_table_split()` called on every table (no page breaks mid-table)
 - [ ] Tone follows CLAUDE.md voice baseline (direct, active, no filler)
 - [ ] AI writing tell check passed (see section above)

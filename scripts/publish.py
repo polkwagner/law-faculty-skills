@@ -119,13 +119,31 @@ FILE_RENAME_RULES = [
     ("polk-memo", "law-memo"),
     ("polk-document", "law-document"),
     ("polk-email-style", "law-email-style"),
+    ("polk-voice-profile", "voice-profile"),
 ]
+
+# --- Section Excludes ---
+# Markdown sections removed wholesale from published output: a heading whose
+# text matches, plus everything under it up to the next heading of the same or
+# a higher level. These document maintainer-only tooling that lives outside
+# this repo, so published copies would instruct installers to run commands
+# they don't have. Match is on heading text, case-insensitive.
+SECTION_EXCLUDES = {"voice feedback capture"}
 
 # --- Scrub Rules ---
 # Applied IN ORDER to all text file content.
 # ORDERING MATTERS: specific patterns first, catch-all last.
 
 SCRUB_RULES = [
+    # --- Maintainer-only paths (before any name rule) ---
+    # The voice profile is bundled with the eddie skill at publish time; the
+    # canonical copy lives in a private repo installers don't have. Point at
+    # the bundled file instead. `~/code/voice-feedback` is also listed in
+    # EXTRA_PRIVATE_STRINGS so any path this rule misses fails the post-scrub
+    # verification rather than shipping.
+    (r"~/code/voice-feedback/approved/polk-voice-profile\.md",
+     "~/.claude/skills/eddie/references/voice-profile.md"),
+
     # --- Email addresses ---
     (r"pwagner@law\.upenn\.edu", "your-email@law.upenn.edu"),
     (r"polk@polkwagner\.com", "your-email@example.com"),
@@ -224,6 +242,38 @@ def rename_file(filename: str) -> str:
         if filename.startswith(old_prefix):
             return new_prefix + filename[len(old_prefix):]
     return filename
+
+
+HEADING_RE = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
+
+
+def strip_sections(text: str) -> tuple[str, list[str]]:
+    """Remove SECTION_EXCLUDES sections from markdown. Returns (text, changes).
+
+    A matching heading and every line under it are dropped, up to the next
+    heading at the same or a higher level (or end of file). Trailing blank
+    lines left behind by the cut are collapsed so the output doesn't gain
+    stray whitespace where a section used to be.
+    """
+    changes = []
+    out = []
+    skip_level = None
+    for line in text.split("\n"):
+        m = HEADING_RE.match(line)
+        if m:
+            level = len(m.group(1))
+            if skip_level is not None and level <= skip_level:
+                skip_level = None
+            if skip_level is None and m.group(2).strip().lower() in SECTION_EXCLUDES:
+                skip_level = level
+                changes.append(f"  removed section '{m.group(2).strip()}'")
+                continue
+        if skip_level is None:
+            out.append(line)
+
+    while out and not out[-1].strip():
+        out.pop()
+    return "\n".join(out) + "\n", changes
 
 
 def scrub_text(text: str) -> tuple[str, list[str]]:
@@ -355,7 +405,12 @@ def copy_tree(src: Path, dst: Path, label: str, manifest: list[str], apply_renam
 
         if is_text_file(src_file):
             text = src_file.read_text(encoding="utf-8")
-            scrubbed, changes = scrub_text(text)
+            changes = []
+            if src_file.suffix.lower() == ".md":
+                text, section_changes = strip_sections(text)
+                changes.extend(section_changes)
+            scrubbed, scrub_changes = scrub_text(text)
+            changes.extend(scrub_changes)
             dst_file.write_text(scrubbed, encoding="utf-8")
             if changes:
                 manifest.append(f"  {rel} (scrubbed):")
@@ -397,7 +452,7 @@ PERSONAL_IDENTIFIER_TOKENS = ["Polk", "Wagner", "pwagner", "polkwagner", "polk@"
 
 # Infrastructure secrets that don't appear as SCRUB_RULES LHS (e.g. webhook id
 # prefixes, signed URLs). Kept explicit because the derivation walks patterns.
-EXTRA_PRIVATE_STRINGS = ["AKfycbw"]
+EXTRA_PRIVATE_STRINGS = ["AKfycbw", "~/code/voice-feedback"]
 
 # Optional private scrub rules loaded from OUTSIDE the repo. Third-party real
 # names (colleagues, cited academics) that appear in source skills/fixtures must

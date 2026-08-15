@@ -14,9 +14,9 @@ Use this guide for email-specific formatting. Voice, tone, banned phrases, and p
 
 These three rules are the most frequently violated in drafts. Apply them before anything else:
 
-1. **Use contractions freely.** Even in semi-formal emails to faculty, deans, and external correspondents, [Your Name] uses "I'm", "we're", "can't", "won't", "it's", "that's", "let's", "don't", "I'd", "you'll". Drafts without contractions read as stiff and are wrong. Every email should contain at least one natural contraction.
+1. **Use contractions when they sound natural.** [Your Name] often writes "I'm", "we're", "can't", "won't", "it's", "that's", "let's", "don't", "I'd", and "you'll", especially in internal and semi-formal messages. Do not force a contraction into every email; the audience and sentence should decide.
 2. **Never open with a preamble.** Do not start the first sentence (after the greeting) with "Thanks for reaching out", "I wanted to reach out", "I hope this email finds you well", "Thanks for your email", "Great question", "Absolutely", or "I'd be happy to help". Open with the substance directly.
-3. **At most 1–2 em-dashes per email, regardless of length.** [Your Name] prefers commas for asides. Em-dashes are reserved for strong emphasis or to set off lists containing commas. Never use em-dashes as bullet leaders.
+3. **Use em-dashes naturally, but not mechanically.** [Your Name] uses em-dashes for asides, interruptions, and emphasis. Do not impose a numerical limit; revise only when repeated dashes make the sentence harder to follow. Never use em-dashes as bullet leaders.
 
 ## Agent Dependencies
 
@@ -43,8 +43,10 @@ Every email must end with a sign-off line that is exactly `[Your Name]` (or `Bes
 ## Email Structure
 
 - Use **bold section headers** in longer emails to organize topics. No numbered sections for headers.
-- Bullet characters (•) for bullet lists, never em-dashes as bullet leaders.
-- Numbered lists for sequential action items, deadlines, or options.
+- **In email, use real indented lists** — plain markdown `-` items, which render as an indented `<ul>` with round markers. [Your Name] chose this over literal `•` characters on 2026-08-13 after comparing both side by side in a sample in his own Outlook. Never em-dashes as bullet leaders.
+  - **This is email-only.** The `•`-with-hanging-indent convention still governs **.docx** output, where a real Word list is explicitly not wanted — see `law-memo` and `law-document`. Don't propagate this change there.
+  - It also overrides the "Bullet lists use •" line in CLAUDE.md for emails; that line's real target is em-dash bullet leaders, which stay banned either way.
+- Numbered lists for sequential action items, deadlines, or options. Items that are merely parallel — one ask each for two different people, say — are a bulleted list, not a numbered one.
 - "So," as a casual transition between sections.
 - Run the AI Writing Tell Check (see CLAUDE.md) before sending. Applies to emails too.
 - **Automated review:** After drafting:
@@ -66,22 +68,5 @@ Every email must end with a sign-off line that is exactly `[Your Name]` (or `Bes
 > I'm hoping this is pretty easy to put hands on - again, just an export of the database (or even a database dump) is fine. If it is tricky or complicated, let me know.
 >
 > Thanks so much!
->
-> [Your Name]
-
-**Event invitation (medium formality):**
-> Dear Colleagues,
->
-> Please join me for a working lunch this Wednesday 2/18 (noon, faculty lounge) where I'll be sharing what I think all of us need to be thinking about right now.
->
-> [Body with context and stakes]
->
-> Whether you're skeptical or curious (or both), this session is designed to give you a firsthand look at where things actually stand — not where the breathless headlines or clickbait social media say they stand.
->
-> Faculty Lounge - 12:00pm - Lunch will be served.
->
-> I hope you'll make it!
->
-> Best,
 >
 > [Your Name]
