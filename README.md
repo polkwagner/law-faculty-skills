@@ -35,7 +35,6 @@ Skills are invoked naturally in conversation — you don't need special syntax:
 | **law-memo** | Produce formatted .docx memos with Penn Carey Law letterhead | python-docx |
 | **law-document** | Produce formatted .docx proposals, reports, and briefing documents | python-docx |
 | **law-email-style** | Draft emails in a professional academic voice | None |
-| **md-to-pdf** | Render Markdown as professionally formatted PDFs in Penn Carey Law style | reportlab |
 | **docx-comment-summary** | Extract and summarize all comments from Word documents | None (stdlib only) |
 | **materials-md** | Convert PDF, DOCX, PPTX, or HTML to clean, AI-ready markdown | [materials-converter](https://github.com/ai-teaching-lab/materials-converter) (`docling`) |
 | **rex** | Critical review of code, plans, or designs | None |
@@ -65,9 +64,9 @@ cp -r agents/* ~/.claude/agents/
 
 1. **An AI coding assistant** — [Claude Code](https://claude.ai/code), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [ChatGPT](https://chatgpt.com) (including ChatGPT EDU), or any tool that supports the [agentskills specification](https://github.com/agentskills/agentskills).
 
-2. **Python 3** (for skills that produce .docx or .pdf output):
+2. **Python 3** (for skills that produce .docx output):
    ```bash
-   pip install python-docx reportlab
+   pip install python-docx
    ```
 
 3. **Pandoc** (for some document conversions):
@@ -120,7 +119,7 @@ If you prefer Custom GPTs, or if Skills aren't yet enabled in your workspace:
 
 **What works well:** Skills focused on writing and analysis — law-email-style, law-class-problems, lecture-slide-reviewer, rex, and the exam generators (law-mcq-generator, law-essay-generator) when producing plain-text output.
 
-**Limitations:** Skills that produce formatted .docx or .pdf files (law-memo, law-document, md-to-pdf) rely on Python scripts and file-system access that ChatGPT's environment handles differently. You'll get the content but may not get the exact Penn Carey Law formatting.
+**Limitations:** Skills that produce formatted .docx files (law-memo, law-document) rely on Python scripts and file-system access that ChatGPT's environment handles differently. You'll get the content but may not get the exact Penn Carey Law formatting.
 
 ### Other tools
 
@@ -142,7 +141,7 @@ The exam-generation skills (law-mcq-generator, law-essay-generator) include an I
 - Add a row with your course name, casebook, and doctrinal areas
 
 ### Document formatting
-The memo, document, and PDF skills use Penn Carey Law branding (logo, Cambria font). These work out of the box — the logo is bundled with the skill.
+The memo and document skills use Penn Carey Law branding (logo, Cambria font). These work out of the box — the logo is bundled with the skill.
 
 ## Questions?
 

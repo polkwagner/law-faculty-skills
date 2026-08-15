@@ -50,9 +50,9 @@ Tests (`test_publish.py`) run automatically before every publish. They guard the
 
 Skills fall into two categories with different editing workflows:
 
-**Synced skills (10)** — source of truth is `~/.claude/skills/`. Edit there, then run `scripts/publish.py` to copy, rename, and scrub into the repo. Never edit these in-repo — changes will be overwritten on next publish.
+**Synced skills (9)** — source of truth is `~/.claude/skills/`. Edit there, then run `scripts/publish.py` to copy, rename, and scrub into the repo. Never edit these in-repo — changes will be overwritten on next publish.
 
-Synced: `law-mcq-generator`, `law-essay-generator`, `lecture-slide-reviewer`, `law-memo`, `law-document`, `law-email-style`, `md-to-pdf`, `docx-comment-summary`, `rex`, `eddie`
+Synced: `law-mcq-generator`, `law-essay-generator`, `lecture-slide-reviewer`, `law-memo`, `law-document`, `law-email-style`, `docx-comment-summary`, `rex`, `eddie`
 
 **Repo-maintained skills (3)** — edited directly in the repo. Not in the publish pipeline's `SKILL_MAP`.
 
@@ -121,9 +121,9 @@ provably contained six, because it had read the wrong branch's copy.
    - `polk-memo` → `law-memo`
    - `polk-document` → `law-document`
    - `polk-email-style` → `law-email-style`
-   - All others keep their names (`law-mcq-generator`, `law-essay-generator`, `lecture-slide-reviewer`, `md-to-pdf`, `docx-comment-summary`, `rex`, `eddie`)
+   - All others keep their names (`law-mcq-generator`, `law-essay-generator`, `lecture-slide-reviewer`, `docx-comment-summary`, `rex`, `eddie`)
 2. Copies agents listed in `AGENT_MAP` into `agents/<name>/` (16 agents, names unchanged)
-3. `EXCLUDED_SKILLS` safety check blocks publication of `send-to-email`, `polk-slides`, `class-prep` (Polk-personalized), `project-folder-setup` (Polk-personalized)
+3. `EXCLUDED_SKILLS` safety check blocks publication of `send-to-email`, `polk-slides`, `class-prep`, `project-folder-setup`, `polk-zotero` (Polk-personalized), and `md-to-pdf` (bundles licensed fonts)
 4. Applies ordered regex scrub rules to skills AND agents (name, title, email → placeholders)
 5. `SKIP_DIRS` excludes `plans/`, `specs/`, `_archive/`, `__pycache__/` (internal working artifacts)
 6. `SKIP_FILE_PATTERNS` excludes `*.v1.md` versioned snapshots, backup cruft (`*.bak`/`*.bak2`/`*.backup`/`*.orig`/trailing `~`), and internal `NOTES-*.md` working notes
@@ -230,7 +230,7 @@ All enforce construct alignment: every tested issue must trace to assigned readi
 ## Dependencies
 
 - **python-docx**: Used by memo, document, MCQ, essay, and validate_mcq for .docx generation/parsing
-- **ReportLab**: Used by md-to-pdf for PDF rendering
+- **WeasyPrint**: Used by md-to-pdf, which is private and excluded from publish (see `EXCLUDED_SKILLS` in `scripts/publish.py`) — it bundles licensed ITC Stone Serif fonts that can't be redistributed
 - **docx-comment-summary**: stdlib only (no pip dependencies) — parses .docx XML directly
 
 ## When Editing Skills
