@@ -128,7 +128,7 @@ FILE_RENAME_RULES = [
 # a higher level. These document maintainer-only tooling that lives outside
 # this repo, so published copies would instruct installers to run commands
 # they don't have. Match is on heading text, case-insensitive.
-SECTION_EXCLUDES = {"voice feedback capture"}
+SECTION_EXCLUDES = {"voice feedback capture", "voice score check"}
 
 # --- Scrub Rules ---
 # Applied IN ORDER to all text file content.
@@ -474,7 +474,8 @@ PERSONAL_IDENTIFIER_TOKENS = ["Polk", "Wagner", "pwagner", "polkwagner", "polk@"
 # "AI Law Lab" itself is deliberately not listed: it is a real, historically
 # accurate program name that may legitimately appear. The Box folder below it
 # is the private part.
-EXTRA_PRIVATE_STRINGS = ["AKfycbw", "~/code/voice-feedback", "AI Final Exam Project"]
+EXTRA_PRIVATE_STRINGS = ["AKfycbw", "~/code/voice-feedback", "AI Final Exam Project",
+                         ".claude/scripts/voice-score"]
 
 # Optional private scrub rules loaded from OUTSIDE the repo. Third-party real
 # names (colleagues, cited academics) that appear in source skills/fixtures must
