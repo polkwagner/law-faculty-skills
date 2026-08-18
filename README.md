@@ -80,21 +80,36 @@ The method depends on which AI tool you use.
 
 ### Claude Code
 
-Install directly from GitHub:
+**Easiest — have Claude install it for you.** Start a Claude Code session and ask:
+
 ```
-/install-skill https://github.com/polkwagner/law-faculty-skills/tree/main/law-mcq-generator
+Install the law-mcq-generator skill from
+https://github.com/polkwagner/law-faculty-skills into ~/.claude/skills/
 ```
 
-Or copy manually:
+Claude fetches the skill folder and puts it where it belongs. Skills are picked
+up immediately, with no restart. Run `/skills` to confirm it's listed.
+
+**Or install it yourself.** Skills live in `~/.claude/skills/`, one folder each:
+
 ```bash
-cp -r law-mcq-generator ~/.claude/skills/
+git clone https://github.com/polkwagner/law-faculty-skills.git
+mkdir -p ~/.claude/skills
+cp -r law-faculty-skills/law-mcq-generator ~/.claude/skills/
 ```
+
+Swap `law-mcq-generator` for whichever skill you want, or repeat the last line
+to install several.
 
 ### Gemini CLI
 
-Copy the skill directory into Gemini's skills location:
+Same idea, different destination — Gemini reads user skills from
+`~/.gemini/skills/`:
+
 ```bash
-cp -r law-mcq-generator ~/.gemini/skills/
+git clone https://github.com/polkwagner/law-faculty-skills.git
+mkdir -p ~/.gemini/skills
+cp -r law-faculty-skills/law-mcq-generator ~/.gemini/skills/
 ```
 
 ### ChatGPT (including ChatGPT EDU)
