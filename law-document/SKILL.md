@@ -157,6 +157,14 @@ def prevent_table_split(table):
 
 Call `prevent_table_split(table)` after populating every table. For very large tables (20+ rows) that genuinely cannot fit on one page, Word will still break them at a row boundary — these properties ensure it never breaks mid-row.
 
+**Table and figure design.** For how a table should be *built* — number
+alignment, how few rules it needs, sort order, significant digits — and for any
+chart or diagram going into the document, read
+`~/.claude/skills/tufte-visuals/SKILL.md`. Anything carrying data also needs its
+integrity check (zero baselines, lie factor, stated normalization) run while the
+source numbers are still in scope, which is before the document is assembled,
+not after.
+
 ### Bullets
 **Real Word list bullets** (changed 2026-08-13 — the old manual `•`-plus-tab approach is superseded). Never em-dash bullets.
 

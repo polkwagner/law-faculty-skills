@@ -111,6 +111,14 @@ For bold lead-in bullets, keep the runs split: bold run (lead phrase), then norm
 ### Tables
 Tables must not split across pages. After building any table, apply `cantSplit` to every row and `keepNext` to all paragraphs in every row except the last. See the law-document skill for the `prevent_table_split(table)` helper function. Call it after populating every table.
 
+**Table and figure design.** For how a table should be *built* — number
+alignment, how few rules it needs, sort order, significant digits — and for any
+chart or diagram going into the document, read
+`~/.claude/skills/tufte-visuals/SKILL.md`. Anything carrying data also needs its
+integrity check (zero baselines, lie factor, stated normalization) run while the
+source numbers are still in scope, which is before the document is assembled,
+not after.
+
 ### Footer
 Italic Cambria 10pt "Page x of y." centered. If cloning from sample, the footer is preserved automatically.
 

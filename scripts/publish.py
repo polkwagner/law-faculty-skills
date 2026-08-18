@@ -44,6 +44,11 @@ SKILL_MAP = {
     "docx-comment-summary":  "docx-comment-summary",
     "rex":                   "rex",
     "eddie":                 "eddie",
+    # Generic information-design guidance — no institutional or personal content.
+    # It MUST stay published: law-document and law-memo both point installers at
+    # ~/.claude/skills/tufte-visuals/, and there is no scrub rule rewriting that
+    # path, so dropping it from this map ships a dangling reference.
+    "tufte-visuals":         "tufte-visuals",
 }
 
 # Agents to include (source_name -> published_name). Agents are shared
