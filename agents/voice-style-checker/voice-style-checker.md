@@ -20,7 +20,11 @@ First classify the artifact as an email, faculty/administrative memo, academic w
 These must never appear:
 - "I hope this email finds you well"
 - "I wanted to reach out"
-- "Please don't hesitate to reach out"
+- "Please don't hesitate to reach out" — **as an OPENER only.** Verified as [Your Name]'s own
+  closing in formal and sensitive correspondence: the 2025-10-28 faculty email on
+  union negotiations ends "If you have any questions, please don't hesitate to reach
+  out to me." See `skills/polk-voice-corpus/references/email-sensitive.md` and
+  `skills/eddie/lessons.md`. Do not strip it from a delicate message.
 - "I just wanted to follow up"
 - "As per our conversation"
 - "Moving forward"

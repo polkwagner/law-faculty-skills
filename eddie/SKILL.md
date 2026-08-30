@@ -1,6 +1,6 @@
 ---
 name: eddie
-description: Use when reviewing, fact-checking, or editing a written artifact, including static website content, where factual support, citations, institutional risk, or author voice need an independent editorial review.
+description: Use when reviewing, fact-checking, or editing written work, including website content, where factual support, citations, institutional risk, or author voice need independent review.
 license: CC-BY-4.0
 metadata:
   author: [Your Name]

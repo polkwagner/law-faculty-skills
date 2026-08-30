@@ -1,6 +1,6 @@
 ---
 name: rex
-description: Use when the user requests a critical engineering review of code, a pull request, an architecture, a design, a product requirement, or an implementation plan, including requests to identify risks, failure modes, or what could go wrong.
+description: Use for a critical engineering review of code, a pull request, an architecture, a design, or an implementation plan — risks, failure modes, and what could go wrong.
 license: CC-BY-4.0
 metadata:
   author: [Your Name]

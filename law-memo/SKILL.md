@@ -137,7 +137,9 @@ Italic Cambria 10pt "Page x of y." centered. If cloning from sample, the footer 
 
 ## Memo-Specific Voice
 
-Memos layer these conventions on top of the CLAUDE.md voice baseline:
+Memos layer these conventions on top of the CLAUDE.md voice baseline. **Read `polk-voice-corpus` → `references/memo-committee.md` first:** two of the CLAUDE.md rules hold for email and break for committee memos. In memos [Your Name] uses closed-up em-dashes (`grades—to recognize`), not the spaced hyphens of his email, and he opens on the situation rather than the conclusion. Verified samples beat the rules where they conflict.
+
+The remaining conventions:
 
 - More formal than emails but never bureaucratic
 - Opens directly with the situation or context — no throat-clearing

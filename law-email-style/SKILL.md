@@ -10,6 +10,8 @@ metadata:
 
 Use this guide for email-specific formatting. Voice, tone, banned phrases, and preferred expressions are defined in the **Writing & Tone** section of CLAUDE.md — that baseline always applies. This skill adds email-specific structure on top.
 
+**Load the `polk-voice-corpus` skill for anything going out under [Your Name]'s name.** It holds verified samples of his actual sent email, and where a sample and a rule disagree the sample wins — the rules were written from memory and have measurably drifted. It also carries the drift signature: the four edits (adding "Please", cutting exclamation points, dropping the joke, rounding off a specific count) that push a draft away from his voice without tripping any banned-phrase check.
+
 ## Voice Priorities (apply to every email)
 
 These three rules are the most frequently violated in drafts. Apply them before anything else:
