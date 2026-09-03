@@ -1,17 +1,9 @@
 ---
 name: law-essay-generator
 description: >
-  Generate assessment-science-grounded essay exam questions for law school courses.
-  Use when asked to create essay questions, issue spotters, exam essays, or essay
-  fact patterns for law school exams. Trigger phrases include "essay question",
-  "essay exam", "issue spotter", "write an essay", "exam essay", "generate an
-  essay", or any request to create law school essay exam questions. Also trigger
-  when asked to create cross-doctrinal fact patterns, grading rubrics, or model
-  answers for law school essay exams. Supports course presets for quick setup.
-  Always use this skill rather than generating essay questions freehand — it
-  enforces assessment-science quality controls including SOLO taxonomy layering,
-  construct alignment to course materials, and rubrics designed for AI-assisted
-  grading.
+  Generate law school essay exam questions: cross-doctrinal issue-spotter fact patterns
+  with rubrics and model answers. Use for any essay question, issue spotter, or exam
+  essay request.
 license: CC-BY-4.0
 compatibility: "Requires python-docx"
 metadata:
@@ -30,15 +22,16 @@ This skill dispatches several sub-agents for quality checks. Each call is guarde
 - `double-read-pass` — fresh-eyes review of fact pattern, rubric, and model answer.
 - `voice-style-checker` — AI-tell scan on the fact pattern.
 
-Install from the `agents/` directory of this skill's repo into `~/.claude/agents/`.
+Requires the agents on the current runtime: `~/.claude/agents/<name>/<name>.md` (Claude Code) or `~/.codex/agents/<name>.toml` (Codex).
 
 ## Environment
 
-This skill works in both **Claude Code CLI** and **Claude.ai / Cowork**:
-
-- **Output:** `~/Downloads/` or user-specified path (CLI) or `/mnt/user-data/outputs/` (web)
-- **Course materials:** ask user for path (CLI) or use `project_knowledge_search`
-  and `/mnt/user-data/uploads/` (web)
+Resolve files relative to this skill's directory: `~/.claude/skills/law-essay-generator/`
+in Claude Code and, via the `~/.codex/skills/` symlink, in Codex;
+`/mnt/skills/user/law-essay-generator/` on claude.ai. Output to `~/Downloads/` (or a
+user-specified path) locally, `/mnt/user-data/outputs/` on claude.ai. Course materials
+come from a folder path the user supplies locally, or from `project_knowledge_search`
+and `/mnt/user-data/uploads/` on claude.ai.
 
 ## Overview
 
@@ -86,9 +79,11 @@ To add a new preset: add a column to this table with the course's defaults.
    - **Path to former exam questions folder** (if available). The folder should
      contain an INDEX.md with YAML frontmatter describing each exam file. If
      no index exists, read the exam files directly and extract the dimensions
-     for the Prior Exam Check. See the Prior Exam Check section below.
+     for the Prior Exam Check. See the Prior Exam Check section of
+     `references/course-context.md`.
    - **Prompt style preference:** open-ended analysis or role-playing directive.
-     See the Prompt Style section below for guidance on when to use each.
+     See the Prompt Style section of `references/design-framework.md` for
+     guidance on when to use each.
 
 3. **Read the syllabus.** Identify class sessions, topics, reading assignments,
    and calculate coverage weights by doctrinal area (number of sessions per area).
@@ -251,7 +246,7 @@ Present this ranking to the user before designing the fact pattern.
 17. Run self-check
 18. Generate four .docx files per essay
 19. Generate machine-readable rubric JSON alongside the .docx rubric (see
-    Rubric Format for Machine Grading below)
+    Rubric Format for Machine Grading in `references/output-format.md`)
 20. **Recommend running the essay dry run tool** (`~/code/essay-dry-run/`)
     to stress-test the essay with multiple AI models before finalizing.
     This is an external tool run from the terminal, not a subagent.
@@ -259,7 +254,7 @@ Present this ranking to the user before designing the fact pattern.
 
 ## Double Read
 
-**Read `references/double-read.md`** for the fresh-eyes review procedure. It dispatches the `double-read-pass` agent — **never exercised** (added 2026-04-18; skill last run 2026-03-27). Confirm the agent returns before trusting a clean pass.
+**Read `references/double-read.md`** for the fresh-eyes review procedure. It dispatches the `double-read-pass` agent. Treat a missing, empty, or malformed agent result as a failed pass.
 
 ## Self-Check Before Delivering
 
@@ -287,24 +282,14 @@ Run every check. If any fails, revise before delivering.
 
 ## What NOT to Do
 
-- Do not generate essay questions without first reading the syllabus and
-  course materials
-- Do not design a fact pattern before presenting the plan for approval
-- Do not test doctrines not covered in the assigned readings
-- Do not create separate sub-scenarios for each IP regime — the regimes
-  must overlap on shared facts
 - Do not write policy questions — essay questions test doctrinal application
   and evaluative analysis, not abstract reasoning about what the law should be.
   Policy goals underlying a doctrine (e.g., "patent disclosure promotes
   innovation") can strengthen a doctrinal argument, but the essay should
   never require or primarily reward policy reasoning over doctrine
-- Do not create a model answer that exceeds the student word limit
-- Do not include rubric criteria without concrete textual markers — vague
-  criteria like "discusses functionality" are unusable for AI-assisted grading
-- Do not skip the emphasis map step — present it to the user before designing
 - Do not use real company names or real people in fact pattern narratives
 - Do not assign more than ~25% of points to extended abstract issues —
   the exam should be achievable, not a trap
 - Do not generate an essay that is substantially identical to a prior exam —
   this violates institutional policy. When prior exams are provided, verify
-  differentiation on at least 3 of 4 dimensions before delivering
+  differentiation on at least 3 of 5 dimensions before delivering

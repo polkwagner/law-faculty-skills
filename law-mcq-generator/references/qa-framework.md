@@ -108,7 +108,8 @@ These tests catch genuinely flawed questions. Do not skip them.
   narrative, the question is testing general knowledge, not application.
   Revise to make the answer depend on specific facts. The most common
   cause of fact-independence is distractors that state wrong legal
-  principles — see the Distractor Mix Requirement above.
+  principles — see the Distractor Mix Requirement in
+  `references/question-design.md`.
 - **Direction 2 — From facts only:** Now read the narrative and the stem
   without the answer key. Answer based solely on what the facts convey.
   If the fact-informed answer differs from the keyed correct answer, the
@@ -117,15 +118,16 @@ These tests catch genuinely flawed questions. Do not skip them.
   type of misalignment because the question punishes careful readers.
 
 **Automated fact-dependency validation (optional but recommended):**
-After generating the full exam, run the no-materials test from the MCQ
-dry-run infrastructure at `~/code/mcq-dry-run/`. This sends the exam
-to two AI models (GPT-4o and Gemini Flash) without any fact patterns
-or course materials. Questions both models answer correctly are
-fact-independent candidates. Target: fewer than 25% of questions
-answered correctly by both models without materials. If this threshold
-is exceeded, the distractor mix is likely wrong — too many distractors
-state incorrect legal principles rather than misapplying correct ones.
-Run with: `python run_phase.py phase1` (cost: ~$0.10, time: ~5 min).
+Only where `~/code/mcq-dry-run/` exists ([Your Name]'s own machines); otherwise
+skip. After generating the full exam, run the no-materials test from that
+MCQ dry-run infrastructure (its CLAUDE.md lists the current models, cost,
+and run time). It sends the exam to several AI models without any fact
+patterns or course materials; questions the models answer correctly anyway
+are fact-independent candidates. Target: fewer than 25% of questions
+answered correctly without materials. If this threshold is exceeded, the
+distractor mix is likely wrong — too many distractors state incorrect
+legal principles rather than misapplying correct ones. Run with
+`python3 run_phase.py phase1` from that directory.
 
 **Course material alignment test (construct alignment):**
 - For each question, trace the tested doctrine back to a specific source
@@ -169,12 +171,12 @@ for delivery.
 This stage catches catastrophic defects — missing content, mismatched
 documents, broken structure — that would make the exam undeliverable.
 
-**Run the reference validation script** located at
-`~/.claude/skills/law-mcq-generator/validate_mcq.py` (CLI) or write
-and execute an equivalent script (web). Do not eyeball these checks.
+**Run the reference validation script** `validate_mcq.py` in this skill's
+directory; on claude.ai, where a shell may be unavailable, write and execute
+an equivalent script. Do not eyeball these checks.
 
 ```
-python3 ~/.claude/skills/law-mcq-generator/validate_mcq.py \
+python3 <this-skill-dir>/validate_mcq.py \
   path/to/exam.docx path/to/answer_key.docx
 ```
 

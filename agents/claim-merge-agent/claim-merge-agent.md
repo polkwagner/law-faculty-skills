@@ -2,7 +2,6 @@
 name: claim-merge-agent
 description: Merges and deduplicates claim lists from two independent extractors into a single unified list. Stage 2a of Eddie's factual pipeline. Applies category-based risk floors. Used by the factual-pipeline-orchestrator agent.
 tools: Read
-model: haiku
 ---
 
 <!-- MODEL TIER: settled on haiku. Do not retier on a timing comparison.

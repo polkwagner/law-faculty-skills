@@ -18,8 +18,8 @@ Before delivering any document, scan the full text for these common AI writing p
 **Overused words to vary or cut:**
 - "several" — AI defaults to "several" when it doesn't know the count. If it appears more than once in a document, vary with "some," "a few," "a number of," or give the actual number
 - "curated" — AI favorite; usually unnecessary
-- "robust" — banned per CLAUDE.md; be specific about what makes something strong
-- "landscape" — banned per CLAUDE.md
+- "robust" — banned by the global instructions (CLAUDE.md in Claude Code, AGENTS.md in Codex); be specific about what makes something strong
+- "landscape" — banned by the same list
 - "nuanced" — AI filler; say what the nuance actually is
 - "multifaceted" — cut; describe the actual facets instead
 - "leveraging" / "utilizing" — banned; use "using"

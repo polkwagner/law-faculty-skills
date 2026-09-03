@@ -1,17 +1,9 @@
 ---
 name: law-mcq-generator
 description: >
-  Generate high-quality multiple choice exam questions for any law school course.
-  Use when asked to create MCQ exam questions, practice questions, or question banks
-  for law school exams. Trigger phrases include "exam questions", "multiple choice",
-  "MCQ", "practice questions", "question bank", "generate questions", or references
-  to creating law exam content. Also trigger when asked to create narrative-based or
-  fact-pattern-based multiple choice questions for any doctrinal law course including
-  IP, contracts, torts, con law, civ pro, etc. Supports course presets for quick
-  setup. Always use this skill rather than generating exam questions freehand — it
-  enforces critical quality controls including distractor validation, cognitive
-  taxonomy tagging, and coverage balancing derived from the psychometric research
-  literature.
+  Generate multiple choice exam questions for any law school course: fact-pattern
+  clusters with validated distractors and answer keys. Use for any MCQ, practice
+  question, or question bank request.
 license: CC-BY-4.0
 metadata:
   author: "[Your Name]"
@@ -30,14 +22,16 @@ This skill dispatches several sub-agents for quality checks. Each call is guarde
 - `double-read-pass` — fresh-eyes review of the generated exam and answer key.
 - `voice-style-checker` — AI-tell scan.
 
-Install from the `agents/` directory of this skill's repo into `~/.claude/agents/`.
+Requires the agents on the current runtime: `~/.claude/agents/<name>/<name>.md` (Claude Code) or `~/.codex/agents/<name>.toml` (Codex).
 
 ## Environment
 
-This skill works in both **Claude Code CLI** and **Claude.ai / Cowork**:
-
-- **Output:** `~/Downloads/` or user-specified path (CLI) or `/mnt/user-data/outputs/` (web)
-- **Course materials:** ask user for path (CLI) or use `project_knowledge_search` and `/mnt/user-data/uploads/` (web)
+Resolve files relative to this skill's directory: `~/.claude/skills/law-mcq-generator/`
+in Claude Code and, via the `~/.codex/skills/` symlink, in Codex;
+`/mnt/skills/user/law-mcq-generator/` on claude.ai. Output to `~/Downloads/` (or a
+user-specified path) locally, `/mnt/user-data/outputs/` on claude.ai. Course materials
+come from a folder path the user supplies locally, or from `project_knowledge_search`
+and `/mnt/user-data/uploads/` on claude.ai.
 
 ## Overview
 
@@ -184,11 +178,6 @@ Fields left blank fall through to the standard discovery flow (read syllabus).
 - Facts so ambiguous that reasonable experts would disagree on the answer
 - Narratives that require specialized non-legal knowledge beyond what's
   provided in the fact pattern
-- Narrative language (titles, descriptions, characterizations) that
-  contradicts or undermines the analytical framing a planned question's
-  correct answer depends on — e.g., describing an article with a
-  supportive title when the correct answer requires treating it as
-  critical analysis
 
 ## Question design
 
@@ -198,7 +187,7 @@ Fields left blank fall through to the standard discovery flow (read syllabus).
 
 **Read `references/qa-framework.md` before Stages 1-3.** It carries the per-stage checks, the distractor validation rules, the fact-answer alignment test, and the two-direction fact dependency test.
 
-The QA stages depend on sub-agents (see Agent Dependencies). **This pipeline has never been run end-to-end** — the agents were added 2026-04-18 and the skill has not been invoked since. Treat the first run as a test: confirm each agent actually returns before trusting a clean report.
+The QA stages depend on sub-agents (see Agent Dependencies). Treat a missing, empty, or malformed agent result as a failed stage.
 
 ## Output
 
@@ -214,15 +203,11 @@ The QA stages depend on sub-agents (see Agent Dependencies). **This pipeline has
 6. Plan narrative clusters and question allocation → present to user → get approval
 7. **Generate markdown drafts** — write `draft_full_set.md`,
    `draft_answer_key_full.md`, and `draft_answer_key_student.md`
-   - **7a. Narrative framing review (before writing questions against each
-     narrative):** Review each narrative's analytical signals — titles,
-     labels, verbs, and descriptive characterizations. For each planned
-     question, verify the narrative's language supports the analytical path
-     the correct answer requires. If a title, description, or
-     characterization contradicts or undermines an intended answer (e.g.,
-     a title suggests endorsement when the answer requires treating the
-     work as criticism), revise the narrative before writing questions
-     against it.
+   - **7a. Narrative framing review:** before writing questions against each
+     narrative, confirm its titles, labels, and characterizations support the
+     analytical path each planned correct answer requires (the fact-answer
+     alignment check in `references/qa-framework.md`); revise the narrative
+     first if not.
 8. **Stage 1 QA** (on markdown drafts): `mcq-structural-reviewer` agent (if available) → per-question item-writing rule checks; fix any violations in the `.md` files
 9. **Stage 2 QA** (on markdown drafts): `adversarial-balance-validator` agent (if available) (type: mcq) → adversarial challenge for each question with fact-pattern citation requirement. Run fact-answer alignment check and two-direction fact dependency test. `construct-alignment-tracer` agent (if available) → verify construct alignment. Fix any issues in the `.md` files.
 10. **Stage 3 QA** (on markdown drafts): Exam-Level Summary — distributions, flagged items. Fix any issues.

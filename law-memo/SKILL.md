@@ -9,7 +9,7 @@ metadata:
 
 # Law Memo Skill
 
-Produces fully formatted Penn Carey Law memos as `.docx` files, matching [Your Name]'s established style: Penn Carey Law letterhead, standard header block, Cambria body text. Voice baseline (tone, banned phrases, preferred expressions) is defined in CLAUDE.md — that always applies. This skill adds memo-specific formatting and structure.
+Produces fully formatted Penn Carey Law memos as `.docx` files, matching [Your Name]'s established style: Penn Carey Law letterhead, standard header block, Cambria body text. Voice baseline (tone, banned phrases, preferred expressions) is defined in the global instructions (CLAUDE.md in Claude Code, AGENTS.md in Codex), Writing & Tone section — that always applies. This skill adds memo-specific formatting and structure.
 
 ---
 
@@ -21,22 +21,19 @@ This skill dispatches sub-agents for pre-delivery quality checks. Each call is g
 - `fact-verifier` — live web/source verification of specific claims.
 - `voice-style-checker` — voice, style, and AI-tell scan.
 
-Install from the `agents/` directory of this skill's repo into `~/.claude/agents/`.
+Each requires the agent on the current runtime: `~/.claude/agents/<name>/<name>.md` (Claude Code) or `~/.codex/agents/<name>.toml` (Codex).
 
 ---
 
 ## Environment
 
-This skill works in both **Claude Code CLI** and **Claude.ai / Cowork**. Use whichever paths exist:
-
-- **Skills:** `~/.claude/skills/` (CLI) or `/mnt/skills/user/` (web)
-- **Output:** `~/Downloads/` or user-specified path (CLI) or `/mnt/user-data/outputs/` (web)
+Resolve files relative to this skill's directory: `~/.claude/skills/law-memo/` in Claude Code and, via the `~/.codex/skills/` symlink, in Codex; `/mnt/skills/user/law-memo/` on claude.ai. Output to `~/Downloads/` (or a user-specified path) locally, `/mnt/user-data/outputs/` on claude.ai.
 
 ---
 
 ## Before Drafting
 
-1. If a sample memo exists at `~/.claude/skills/law-memo/law-memo_sample.docx` (CLI) or `/mnt/skills/user/law-memo/law-memo_sample.docx` (web), clone it as the base for exact formatting
+1. If the sample memo `<this-skill-dir>/law-memo_sample.docx` exists, clone it as the base for exact formatting
 2. Clarify with the user if needed: recipient, subject/RE line, key points to cover, any attachments or action items
 
 ---
@@ -45,14 +42,14 @@ This skill works in both **Claude Code CLI** and **Claude.ai / Cowork**. Use whi
 
 ### Page Setup
 - **Margins**: 1" on all sides (1440 twips)
-- **Font**: Cambria 12pt throughout — header block AND body text. Do NOT use Book Antiqua.
+- **Font**: Cambria 12pt throughout — header block AND body text. No other face anywhere, Book Antiqua included.
 - **Line spacing**: 276 / auto (~1.15)
 
 ### Logo
 - Centered paragraph, `w:after="200"`
-- Image: `PennCareyLaw_UPenn_Blue-WhiteBkrnd.png` from `~/.claude/skills/law-memo/assets/` (CLI) or `/mnt/skills/user/law-memo/assets/` (web)
+- Image: `<this-skill-dir>/assets/PennCareyLaw_UPenn_Blue-WhiteBkrnd.png`
 - EMU dimensions: `cx="2628900" cy="476250"` (matches sample exactly)
-- **ALWAYS include the logo. This is mandatory.**
+- The logo is required; if the asset is missing, stop and tell [Your Name].
 
 ### MEMORANDUM Title
 - Centered, `w:after="240"`, Cambria bold 12pt
@@ -84,12 +81,11 @@ Paragraph with bottom border, `w:after="240"`:
 
 ### Body Text
 - Cambria 12pt, `w:line="276" w:lineRule="auto" w:after="160"`
-- **No Book Antiqua anywhere**
 - Bold used sparingly for key terms and section heads
 - Section headings: bold Cambria 12pt, `w:before="200" w:after="80"`
 
 ### Bullets
-**Real Word list bullets** (changed 2026-08-13 — the old manual `•`-plus-tab approach is superseded). Never em-dash bullets.
+**Real Word list bullets.** Never a hand-typed `•`, and never em-dash bullets.
 
 `law-memo_sample.docx` already ships the definitions this needs: `word/numbering.xml` defines `numId 1` as a `bullet` list whose level-0 marker is `●` at `w:left="720" w:hanging="360"`, and `styles.xml` carries a `ListParagraph` style. So cloning the sample gives you working lists with no numbering setup:
 
@@ -104,9 +100,9 @@ Paragraph with bottom border, `w:after="240"`:
 
 Do **not** also emit a literal `•` or a leading tab — the list supplies both, and doing it by hand yields a doubled marker. Drop the manual `w:ind`; the numbering definition owns the indent.
 
-For bold lead-in bullets, keep the runs split: bold run (lead phrase), then normal run (rest of text). There is no longer a bullet+tab run.
+For bold lead-in bullets, keep the runs split: bold run (lead phrase), then normal run (rest of text). No bullet or tab run.
 
-**If you are not cloning the sample**, verify `numbering.xml` exists and that `numId 1` resolves, or the bullets render as unmarked indented paragraphs. Fail loudly rather than silently falling back to the old `•` character.
+**If you are not cloning the sample**, verify `numbering.xml` exists and that `numId 1` resolves, or the bullets render as unmarked indented paragraphs. Fail loudly rather than silently falling back to a literal `•` character.
 
 ### Tables
 Tables must not split across pages. After building any table, apply `cantSplit` to every row and `keepNext` to all paragraphs in every row except the last. See the law-document skill for the `prevent_table_split(table)` helper function. Call it after populating every table.
@@ -114,7 +110,7 @@ Tables must not split across pages. After building any table, apply `cantSplit` 
 **Table and figure design.** For how a table should be *built* — number
 alignment, how few rules it needs, sort order, significant digits — and for any
 chart or diagram going into the document, read
-`~/.claude/skills/tufte-visuals/SKILL.md`. Anything carrying data also needs its
+the `tufte-visuals` skill installed beside this one. Anything carrying data also needs its
 integrity check (zero baselines, lie factor, stated normalization) run while the
 source numbers are still in scope, which is before the document is assembled,
 not after.
@@ -137,7 +133,7 @@ Italic Cambria 10pt "Page x of y." centered. If cloning from sample, the footer 
 
 ## Memo-Specific Voice
 
-Memos layer these conventions on top of the CLAUDE.md voice baseline. **Read `polk-voice-corpus` → `references/memo-committee.md` first:** two of the CLAUDE.md rules hold for email and break for committee memos. In memos [Your Name] uses closed-up em-dashes (`grades—to recognize`), not the spaced hyphens of his email, and he opens on the situation rather than the conclusion. Verified samples beat the rules where they conflict.
+Memos layer these conventions on top of the global-instructions voice baseline. **Read `polk-voice-corpus` → `references/memo-committee.md` first:** two of the Writing & Tone rules hold for email and break for committee memos. In memos [Your Name] uses closed-up em-dashes (`grades—to recognize`), not the spaced hyphens of his email, and he opens on the situation rather than the conclusion. Verified samples beat the rules where they conflict.
 
 The remaining conventions:
 
@@ -158,7 +154,7 @@ The remaining conventions:
 ### Standard policy/recommendation memo
 1. **Situation paragraph** — what is the issue and why it matters (2-4 sentences)
 2. **Recommendation paragraph** — what [Your Name] recommends, leading into bullet list if needed
-3. **Bullet list** (if applicable) — em-dash style
+3. **Bullet list** (if applicable) — real Word list bullets (see Bullets)
 4. **Implications/advisory paragraph** (if applicable)
 5. **Next steps paragraph** — who will do what, closing the loop
 
@@ -171,7 +167,7 @@ The remaining conventions:
 
 ## AI Writing Tell Check
 
-Before delivering any memo, scan the full text for common AI writing patterns and fix every instance. See the law-document skill for the complete checklist. The short version:
+Before delivering any memo, scan the full text for common AI writing patterns and fix every instance. The complete checklist is in `law-document/references/voice-checks.md` (the `law-document` skill installed beside this one). The short version:
 
 - **Cut filler:** "a wide range of," "a variety of," "taken together," "reflecting the breadth of," "in a structured way," "the larger point is"
 - **Vary or cut overused words:** "several" (if used more than once), "curated," "nuanced," "multifaceted"
@@ -192,16 +188,22 @@ Complete all steps before delivering to the user.
 
 - **Default (one-off memos):** `Memo_[Topic]_[YYYY-MM].docx` (e.g., `Memo_OCI-Calendar_2025-09.docx`).
 - **Project-folder iterations** (when generating from a versioned `-vN.md` source inside a project folder following the `project-folder-setup` pattern): the published `.docx` filename must carry the same version stamp as its source markdown — and must always stay in sync with it. Source `Topic-v0.md` → `Topic_v0.docx`; bumping the markdown to `v1` → rebuild as `Topic_v1.docx`. Never let the working markdown drift to a different version stamp than the published `.docx`.
-- **Version semantics:** v0 = preliminary / first draft, internal editing only (not yet distributed); v1 = first distributed draft; v2, v3, … = subsequent modifications after distribution. See `~/.claude/skills/project-folder-setup/SKILL.md` for the full versioning workflow and the canonical project folder layout (`zz_working/`, `zz_archives/`, `zz_source-material/`, `zz_docs/`).
+- **Version semantics:** v0 = preliminary / first draft, internal editing only (not yet distributed); v1 = first distributed draft; v2, v3, … = subsequent modifications after distribution. See the `project-folder-setup` skill installed beside this one for the full versioning workflow and the canonical project folder layout (`zz_working/`, `zz_archives/`, `zz_source-material/`, `zz_docs/`).
 
 ---
 
 ## Post-Generation Validation (Required)
 
-After generating any .docx file, run the validation script from the law-document
-skill (`~/.claude/skills/law-document/SKILL.md`, "Post-Generation Validation"
-section). This catches structural corruption (duplicate style IDs, misnamed images)
-that prevents Word from opening the file.
+After generating any .docx file, run the validator bundled with the `law-document`
+skill installed beside this one:
+
+```bash
+python3 <law-document-dir>/scripts/validate_docx.py path/to/output.docx
+```
+
+It catches structural corruption (duplicate style IDs, misnamed images) that
+prevents Word from opening the file. `VALID:` means done; a `REPAIRED` line means
+the file was corrupted and has been patched.
 
 If validation reports repairs, **switch to python-docx and regenerate** — the repair
 is a safety net, not a substitute for correct generation. Do not use Pandoc to
@@ -211,15 +213,15 @@ generate .docx files.
 
 ## Quick Checklist Before Delivering
 
-- [ ] **LOGO INCLUDED** — Penn Carey Law logo in title block (MANDATORY, ALWAYS)
+- [ ] Penn Carey Law logo in title block (required; stop if the asset is missing)
 - [ ] MEMORANDUM centered, Cambria bold 12pt
 - [ ] Header block: TO / FROM / DATE / RE — labels bold, tab at 1440, spacing after 160
 - [ ] DATE is the actual current date (full: e.g. "March 18, 2026") — never just month/year
 - [ ] RE value is bold, with hanging indent (`w:left="1440" w:hanging="1440"`)
 - [ ] Horizontal rule after header (bottom border, sz=6, after=240)
-- [ ] Cambria 12pt throughout — NO Book Antiqua
+- [ ] Cambria 12pt throughout
 - [ ] Real Word list bullets (`ListParagraph` + `numPr` → `numId 1`), no hand-written `•` or tab
 - [ ] Footer: italic Cambria 10pt "Page x of y." centered
-- [ ] Tone follows CLAUDE.md voice baseline (direct, active, no filler)
+- [ ] Tone follows the global-instructions voice baseline (direct, active, no filler)
 - [ ] AI writing tell check passed (see section above)
 - [ ] Closes with action/next-steps paragraph

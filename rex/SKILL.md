@@ -82,7 +82,7 @@ Start with one coverage sentence. Then list findings by severity, highest first.
 4. **Problem and consequence:** the concrete failure mode and affected surface.
 5. **Fix:** a specific, proportionate action.
 
-Keep a normal finding to two to four sentences. Do not restate the artifact, explain general engineering principles, or pad the output.
+Keep each finding to what its evidence needs. Do not restate the artifact, explain general engineering principles, or pad the output.
 
 Always close with one of:
 

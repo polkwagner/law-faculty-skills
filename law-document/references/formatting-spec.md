@@ -81,13 +81,13 @@ Call `prevent_table_split(table)` after populating every table. For very large t
 **Table and figure design.** For how a table should be *built* — number
 alignment, how few rules it needs, sort order, significant digits — and for any
 chart or diagram going into the document, read
-`~/.claude/skills/tufte-visuals/SKILL.md`. Anything carrying data also needs its
+the `tufte-visuals` skill installed beside this one. Anything carrying data also needs its
 integrity check (zero baselines, lie factor, stated normalization) run while the
 source numbers are still in scope, which is before the document is assembled,
 not after.
 
 ### Bullets
-**Real Word list bullets** (changed 2026-08-13 — the old manual `•`-plus-tab approach is superseded). Never em-dash bullets.
+**Real Word list bullets.** Never a hand-typed `•`, and never em-dash bullets.
 
 Since this skill builds with python-docx from a fresh `Document()`, use the built-in style. Verified 2026-08-13: python-docx's default template defines `ListBullet` with a `w:numPr` referencing `numId 1`, which resolves in `numbering.xml` to a level-0 `bullet` format. It renders as a proper round bullet with no numbering setup of your own:
 

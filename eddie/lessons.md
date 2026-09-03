@@ -111,6 +111,12 @@ go under "Project-specific" with the project name.
 
   - **`gh pr list`'s default output carries no column headers, and its trailing timestamp is `createdAt`, not `mergedAt`.** Verified against `--json` on four PRs, 2026-08-30: every displayed value matched creation exactly. The trap is that a PR merged soon after opening makes the two indistinguishable — three of the four agreed to the minute, and only the fourth, open eight days, exposed the error. Reading a merge date off that table put a wrong date in a project wiki and made a correct history entry look self-contradictory. **How to apply:** never state a merge date from the default table — ask for `--json number,mergedAt`. Generalize it to any unlabelled column in a CLI's human-readable output: with no header, nothing on screen will contradict the misreading, and a plausible-looking date reads as sourced. Like the CourtListener and Docling entries, this guards against *accepting* a wrong fact rather than over-flagging a good one.  (2026-08-30, Sixth Circuit portal PR reconciliation)
 
+  - A completeness claim immediately followed by an explicit invitation to report exceptions ("live on every surface that matters… if you spot one I missed, post it here") is self-limiting, not an internal contradiction. Don't flag the pair, and don't propose softening a claim the text has already softened.  (2026-08-30, PCL AI Project rebrand Slack post)
+
+  - A possessive already assigns credit: "Tom Baker's casebook is live with his students" does not read as the organization claiming his work. Flag announcement attribution only on a concrete ownership signal in the text — and never propose a fix that inserts an organizational claim ("his book, our pipeline") the original didn't make.  (2026-08-30, PCL AI Project fall reboot Slack post)
+
+  - Applicant-facing hiring documents don't establish facts about existing staff. Before citing a posting, offer letter, or job description as evidence of a problem in a message to a current team, confirm the source actually covers that population — unresolved terms for new hires say nothing about people already on the roster.  (2026-08-30, PCL AI Project fall reboot Slack post)
+
 ## Project-specific
 
 **JD Concentrations** (`Deputy Dean Background Materials/.../Curricular Items/JD Concentrations`)

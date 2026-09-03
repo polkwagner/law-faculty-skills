@@ -16,9 +16,8 @@ All documents use Penn Law formatting:
 - **Headings:** Cambria 12pt bold, same size as body
 - **Page numbers:** centered footer, Cambria 10pt italic, "Page x of y."
 
-Read the `law-document` skill for detailed .docx formatting conventions:
-`~/.claude/skills/law-document/SKILL.md` (CLI) or
-`/mnt/skills/user/law-document/SKILL.md` (web).
+Read the `law-document` skill installed beside this one for detailed .docx
+formatting conventions.
 
 ### Output 1: Exam Question
 

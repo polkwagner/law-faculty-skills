@@ -34,7 +34,7 @@ If no file is given, review the most recently supplied artifact. Do not create o
 
 ## Preflight
 
-Before reviewing, state in 4-8 lines:
+Before reviewing, state briefly:
 
 1. Target, document mode, stakes, and intensity.
 2. Available runtime capabilities, not merely files found on disk: web verification, link checking, agent slots, and source materials.
@@ -65,7 +65,7 @@ Load Eddie lessons from the active skill directory or an explicit `lessons=` pat
 
 ### Voice calibration
 
-For every voice/style pass, read `~/.claude/skills/eddie/references/voice-profile.md` before applying banned-phrase or AI-tell rules. Classify the document's genre and audience first. The canonical profile's positive rules and false-positive controls govern; the generic banned list is a screen, not a complete style standard. A finding must identify a concrete reader problem and provide a more natural [Your Name]-like replacement. Do not flag first-person judgment, measured concessions, semicolons, em-dashes, information-bearing parentheticals, or legitimate list parallelism merely because they occur.
+For every voice/style pass, read `~/.claude/skills/eddie/references/voice-profile.md` before applying banned-phrase or AI-tell rules; if that path is absent, read the voice profile under `references/` in this skill directory (a synced copy). Classify the document's genre and audience first. The canonical profile's positive rules and false-positive controls govern; the generic banned list is a screen, not a complete style standard. A finding must identify a concrete reader problem and provide a more natural [Your Name]-like replacement. Do not flag first-person judgment, measured concessions, semicolons, em-dashes, information-bearing parentheticals, or legitimate list parallelism merely because they occur.
 
 ### Planning Artifacts
 
@@ -83,7 +83,7 @@ Conversation context may clarify scope, but it is not a plan unless the user exp
 
 1. Read the complete target and identify its mode: email, memo, report/proposal, academic writing, slides, static website, or other.
 2. Build a claim inventory for every P1/P2 candidate: exact claim, location, source available, verification status, and proposed replacement if needed.
-3. Run the selected tier's review passes. The factual pass owns direct-quotation extraction and citation verification. Do not dispatch a separate quote extractor unless the factual pass lacks that capability.
+3. Run the selected tier's review passes. The factual pass owns direct-quotation extraction and citation verification. When the runtime exposes `factual-pipeline-orchestrator` as a dispatchable role, use it for the factual pass and provide `document_path`, `intensity`, and any `source_paths`. That bounded orchestrator also owns claim extraction, coverage auditing, and adversarial re-verification. The role named `factual-reviewer` is only a claim extractor; never treat its output alone as a completed factual review. If the orchestrator cannot run, perform the claim inventory and verification locally and disclose the reduced coverage.
 4. Run plan reconciliation only against active artifacts.
 5. Merge findings. Accept a finding only if it has a concrete downside, exact location, actionable revision, and confidence appropriate to the evidence. Do not report speculative reader inferences or low-confidence marginal observations.
 6. If capacity permits and there are material findings, run second eyes against the original artifact and the merged findings. It removes false positives, calibrates priority, and finds genuine omissions.
@@ -135,6 +135,6 @@ A detailed report contains: summary; coverage and limitations; issue table; evid
 
 - Rewrite, commit, or publish the target unless separately directed.
 - Claim an unavailable pass ran.
-- Treat missing agent files as proof of runtime capability.
+- Treat an agent file on disk as proof of runtime capability.
 - Treat stale planning artifacts as current requirements.
 - Invent concerns to make a review look thorough.

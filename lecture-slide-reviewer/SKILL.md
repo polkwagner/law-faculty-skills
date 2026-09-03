@@ -1,12 +1,9 @@
 ---
 name: lecture-slide-reviewer
 description: >
-  Review lecture slides against assigned readings for a law school class session.
-  Use when asked to review slides, check slide coverage, assess pacing, or
-  compare a slide deck against readings. Trigger phrases include "review my slides",
-  "check my slides", "slide review", "pacing check", or references to preparing
-  a lecture or class session. For full class prep (slides + problems + lecture guide),
-  use the law-class-prep skill instead — it includes slide review as one of its three tasks.
+  Review lecture slides against assigned readings for a law school class session:
+  coverage, gaps, and pacing. Use for a slide review or pacing check; for full class
+  prep use law-class-prep.
 license: CC-BY-4.0
 metadata:
   author: "[Your Name]"
@@ -19,7 +16,7 @@ This skill dispatches one sub-agent for alignment analysis. The call is guarded 
 
 - `slide-reading-alignment` — compares slides against assigned readings session-by-session and returns a coverage report.
 
-Install from the `agents/` directory of this skill's repo into `~/.claude/agents/`.
+Requires the agent on the current runtime: `~/.claude/agents/slide-reading-alignment/slide-reading-alignment.md` (Claude Code) or `~/.codex/agents/slide-reading-alignment.toml` (Codex).
 
 ## Context
 

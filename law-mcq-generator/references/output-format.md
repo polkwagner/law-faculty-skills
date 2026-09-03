@@ -41,23 +41,10 @@ the `.docx` files are generated from them.
 
 ### Templates (for production phase)
 
-Templates are stored in the skill directory with pre-defined styles:
-
-```python
-from docx import Document
-import os
-
-SKILL_DIR = os.path.expanduser("~/.claude/skills/law-mcq-generator")
-
-# Exam questions document
-exam = Document(os.path.join(SKILL_DIR, "exam_template.docx"))
-
-# Full answer key (for professor)
-ak = Document(os.path.join(SKILL_DIR, "answer_key_template.docx"))
-
-# Student answer key
-sak = Document(os.path.join(SKILL_DIR, "student_answer_key_template.docx"))
-```
+Templates (`exam_template.docx`, `answer_key_template.docx`,
+`student_answer_key_template.docx`) are stored in this skill's directory with
+pre-defined styles. Use `gen_docx.py` in this skill's directory to build the
+documents — it locates the templates relative to itself.
 
 Each template contains placeholder paragraphs (one per style) to keep
 style definitions alive. **Clear all placeholder paragraphs before
@@ -184,7 +171,7 @@ scanning.
 - Distractor analysis (taxonomy code, why it's wrong)
 - Challenge notes where applicable
 
-Exam-Level Summary at the end (see Stage 3 above).
+Exam-Level Summary at the end (see Stage 3 in `references/qa-framework.md`).
 
 ### Document 3: Student Answer Key
 

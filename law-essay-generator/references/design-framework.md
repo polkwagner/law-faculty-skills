@@ -68,7 +68,7 @@ each framework in isolation. The C student identifies only the obvious one.
 - A memorable subtitle: "The one with the [thing]"
 - **No real company names or real people** in the narrative
 - The call of the question follows the user's chosen **prompt style** (see
-  the Prompt Style section above). If the user chose open-ended, use a
+  the Prompt Style section below). If the user chose open-ended, use a
   regime-neutral directive. If role-playing, frame around a client and
   specific task. If no preference was stated, default based on the exam
   structure (single essay → open-ended; multiple essays → role-playing).

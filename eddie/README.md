@@ -18,6 +18,7 @@ Natural-language requests such as “run an Eddie review” also activate the sk
 - Runs in Claude, Codex, and any runtime with the required capabilities; it no longer assumes `~/.claude` or treats a local agent file as proof that the role can run.
 - Selects `full`, `standard`, or `compact` review based on stakes and actual agent capacity. A missing agent reduces coverage but does not abort the review.
 - Uses one agent budget, reserves second eyes for material findings, and assigns quotation extraction to the factual pass to avoid duplicate work.
+- Dispatches the bounded `factual-pipeline-orchestrator` when available, while keeping its agent definitions model-neutral so Codex and Claude can both instantiate them.
 - Excludes completed and historical plans from automatic reconciliation.
 - Adds a static-website mode for links, public/private boundaries, semester freshness, deep links, headings, and link text.
 - Requires an evidence ledger for material factual and citation findings.

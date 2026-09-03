@@ -21,16 +21,13 @@ This skill dispatches sub-agents for pre-delivery quality checks. Each call is g
 - `fact-verifier` — live web/source verification of specific claims.
 - `voice-style-checker` — voice, style, and AI-tell scan.
 
-Install from the `agents/` directory of this skill's repo into `~/.claude/agents/`.
+Each requires the agent on the current runtime: `~/.claude/agents/<name>/<name>.md` (Claude Code) or `~/.codex/agents/<name>.toml` (Codex).
 
 ---
 
 ## Environment
 
-This skill works in both **Claude Code CLI** and **Claude.ai / Cowork**. Use whichever paths exist:
-
-- **Skills:** `~/.claude/skills/` (CLI) or `/mnt/skills/user/` (web)
-- **Output:** `~/Downloads/` or user-specified path (CLI) or `/mnt/user-data/outputs/` (web)
+Resolve files relative to this skill's directory: `~/.claude/skills/law-document/` in Claude Code and, via the `~/.codex/skills/` symlink, in Codex; `/mnt/skills/user/law-document/` on claude.ai. Output to `~/Downloads/` (or a user-specified path) locally, `/mnt/user-data/outputs/` on claude.ai.
 
 ## Before Drafting
 
@@ -44,11 +41,9 @@ This skill works in both **Claude Code CLI** and **Claude.ai / Cowork**. Use whi
 
 Every document begins with the Penn Carey Law logo centered in the title block. This is the first step of file production, not a checklist item.
 
-**Path:** `~/.claude/skills/law-document/assets/PennCareyLaw_UPenn_Blue-WhiteBkrnd.png` (CLI)
-or `/mnt/skills/user/law-document/assets/PennCareyLaw_UPenn_Blue-WhiteBkrnd.png` (web).
-Try CLI path first; if not found, try web path.
+**Path:** `<this-skill-dir>/assets/PennCareyLaw_UPenn_Blue-WhiteBkrnd.png`, resolved relative to this skill's directory (the candidate list in the snippet below covers Claude Code, Codex, and claude.ai).
 
-If neither path works, **stop and tell the user** — do not produce a document without it.
+If no candidate exists, **stop and tell the user** — do not produce a document without it.
 
 **Sizing:** The logo must be resized proportionally. The source image is 2000×358 pixels (aspect ratio 5.587:1). Target width is 2.875 inches.
 
@@ -59,10 +54,12 @@ If neither path works, **stop and tell the user** — do not produce a document 
 ```python
 from docx.shared import Emu
 
-# Try CLI path first, then web path
+# Resolve relative to this skill's directory on whichever runtime is active
+_LOGO = "law-document/assets/PennCareyLaw_UPenn_Blue-WhiteBkrnd.png"
 for p in [
-    os.path.expanduser("~/.claude/skills/law-document/assets/PennCareyLaw_UPenn_Blue-WhiteBkrnd.png"),
-    "/mnt/skills/user/law-document/assets/PennCareyLaw_UPenn_Blue-WhiteBkrnd.png",
+    os.path.expanduser("~/.claude/skills/" + _LOGO),   # Claude Code
+    os.path.expanduser("~/.codex/skills/" + _LOGO),    # Codex (symlink to the same files)
+    "/mnt/skills/user/" + _LOGO,                       # claude.ai
 ]:
     if os.path.exists(p):
         LOGO_PATH = p
@@ -87,7 +84,7 @@ run.add_picture(LOGO_PATH, width=LOGO_WIDTH, height=LOGO_HEIGHT)
 
 ## Tone and Voice
 
-Voice baseline (tone, banned phrases, preferred expressions) is defined in CLAUDE.md — that always applies. **For longer-form institutional prose, also load `polk-voice-corpus`** — its `references/memo-committee.md` carries verified samples of [Your Name]'s committee memos, including the closed-up em-dash convention and the situation-before-recommendation opening, both of which differ from the general CLAUDE.md guidance. Where a sample and a rule conflict, the sample wins.
+Voice baseline (tone, banned phrases, preferred expressions) is defined in the global instructions (CLAUDE.md in Claude Code, AGENTS.md in Codex), Writing & Tone section — that always applies. **For longer-form institutional prose, also load `polk-voice-corpus`** — its `references/memo-committee.md` carries verified samples of [Your Name]'s committee memos, including the closed-up em-dash convention and the situation-before-recommendation opening, both of which differ from the general Writing & Tone guidance. Where a sample and a rule conflict, the sample wins.
 
 Documents layer on these additional conventions:
 
@@ -144,7 +141,7 @@ relationships that cause Word to refuse to open the file.
 8. Filename convention:
    - **Default (one-off documents):** `[DocType]_[Topic]_[YYYY-MM].docx` (e.g., `Proposal_StudentProjects_2025-11.docx`).
    - **Project-folder iterations (when generating from a versioned `-vN.md` source in a project that follows the project-folder-setup pattern):** the published `.docx` filename must carry the same version stamp as its source markdown — and must **always stay in sync** with it. Source `Topic-v0.md` → `Topic_v0.docx`; source bumps to `Topic-v1.md` → rebuild as `Topic_v1.docx`. Never let the working markdown drift to a different version stamp than the published `.docx`. Keeping the version stamp synced is the primary signal of where the editing state lives; without it, reviewers can't tell which round of edits the docx reflects.
-   - **Version semantics:** v0 = preliminary / first draft, internal editing only (not yet distributed). v1 = first distributed draft (the bump from v0 to v1 marks distribution). v2, v3, v4, … = subsequent modifications after distribution. Multiple internal Eddie reviews, polish rounds, and fact-checks all happen at v0; the bump to v1 is the distribution moment. See `~/.claude/skills/project-folder-setup/SKILL.md` for the full versioning workflow.
+   - **Version semantics:** v0 = preliminary / first draft, internal editing only (not yet distributed). v1 = first distributed draft (the bump from v0 to v1 marks distribution). v2, v3, v4, … = subsequent modifications after distribution. Multiple internal Eddie reviews, polish rounds, and fact-checks all happen at v0; the bump to v1 is the distribution moment. See the `project-folder-setup` skill installed beside this one for the full versioning workflow.
 
 ---
 
@@ -156,63 +153,17 @@ Also load **`polk-voice-corpus`** — verified samples of [Your Name]'s own inst
 
 ## Post-Generation Validation (Required)
 
-After generating any .docx file, run this validation script to catch structural
-issues that prevent Word from opening the file. This is mandatory — do not skip it.
+After generating any .docx file, run the bundled validator. It catches the
+structural issues (duplicate style IDs, images named after relationship IDs)
+that stop Word from opening the file, and repairs the first kind in place.
 
-```python
-import zipfile, re, os
-
-def validate_and_repair_docx(filepath):
-    """Check a .docx for common corruption issues and repair if needed."""
-    repairs = []
-    z = zipfile.ZipFile(filepath, 'r')
-    styles_xml = z.read('word/styles.xml').decode('utf-8')
-
-    # Check 1: Duplicate style IDs (Pandoc artifact — should not happen with
-    # python-docx, but check anyway as a safety net)
-    pattern = r'<w:style\s[^>]*w:styleId="([^"]*)"'
-    style_ids = re.findall(pattern, styles_xml)
-    from collections import Counter
-    dupes = {k: v for k, v in Counter(style_ids).items() if v > 1}
-    if dupes:
-        repairs.append(f"Duplicate style IDs found: {list(dupes.keys())}")
-        # Remove duplicates via regex on raw XML (preserves exact structure)
-        seen = set()
-        full_pattern = r'(<w:style\s[^>]*w:styleId="([^"]*)"[^>]*>.*?</w:style>)'
-        def dedup(m):
-            sid = m.group(2)
-            if sid in seen:
-                return ''
-            seen.add(sid)
-            return m.group(1)
-        styles_xml = re.sub(full_pattern, dedup, styles_xml, flags=re.DOTALL)
-        styles_xml = re.sub(r'\n\s*\n', '\n', styles_xml)
-
-    # Check 2: Images named after relationship IDs (another Pandoc artifact)
-    bad_images = [n for n in z.namelist()
-                  if n.startswith('word/media/rId') and n.endswith('.png')]
-    if bad_images:
-        repairs.append(f"Images with rId names found: {bad_images}")
-
-    if repairs:
-        # Rewrite the file with fixes
-        tmp = filepath + '.tmp'
-        z_out = zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED)
-        for item in z.infolist():
-            if item.filename == 'word/styles.xml':
-                z_out.writestr(item, styles_xml.encode('utf-8'))
-            else:
-                z_out.writestr(item, z.read(item.filename))
-        z_out.close()
-        z.close()
-        os.replace(tmp, filepath)
-        print(f"REPAIRED {filepath}: {'; '.join(repairs)}")
-    else:
-        z.close()
-        print(f"VALID: {filepath}")
-
-validate_and_repair_docx("path/to/output.docx")
+```bash
+python3 <this-skill-dir>/scripts/validate_docx.py path/to/output.docx
 ```
+
+Read its output: `VALID:` means done; a `REPAIRED` line means the file was
+corrupted and has been patched; a non-zero exit means the file could not be
+read as a .docx at all.
 
 If validation reports any repairs, that means the generation method produced a
 corrupted file. **Switch to python-docx and regenerate** — do not rely on the
@@ -230,7 +181,7 @@ correct generation.
 - [ ] Body paragraphs: `w:line="276" w:after="160"`
 - [ ] Real Word list bullets (`style="List Bullet"`, runs set to Cambria 12pt); lists introduced by full sentences
 - [ ] Tables: `prevent_table_split()` called on every table (no page breaks mid-table)
-- [ ] Tone follows CLAUDE.md voice baseline (direct, active, no filler)
+- [ ] Tone follows the global-instructions voice baseline (direct, active, no filler)
 - [ ] AI writing tell check passed (see section above)
 - [ ] Closes with concrete next steps or recommendations
 - [ ] Footer present on multi-page documents (centered, Cambria 10pt italic, "Page x of y.")
