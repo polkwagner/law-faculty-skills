@@ -3,6 +3,10 @@ set -eu
 
 skill_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 repo_root=$(CDPATH= cd -- "$skill_dir/../.." && pwd)
+# Agents sit beside the skills dir in ~/.claude and claude-sync (skills/eddie ->
+# ../../agents), but beside the skill itself in the public repo (eddie -> ../agents).
+agents_root="$repo_root/agents"
+[ -d "$skill_dir/../agents" ] && agents_root=$(CDPATH= cd -- "$skill_dir/../agents" && pwd)
 skill="$skill_dir/SKILL.md"
 
 require() {
@@ -66,7 +70,7 @@ for agent in \
   fix-verifier \
   voice-style-checker
 do
-  agent_file="$repo_root/agents/$agent/$agent.md"
+  agent_file="$agents_root/$agent/$agent.md"
   test -f "$agent_file"
   if grep -Eq '^model: *(opus|sonnet|haiku) *$' "$agent_file"; then
     printf 'Claude-only model pin breaks Codex agent dispatch: %s\n' "$agent_file" >&2
