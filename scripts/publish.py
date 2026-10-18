@@ -95,7 +95,9 @@ EXCLUDED_SKILLS = {"send-to-email", "polk-slides", "class-prep", "project-folder
 # not synced from source. They are not in SKILL_MAP so they won't be touched.
 
 # Files to skip during copy (exact filename match)
-SKIP_FILES = {".DS_Store", "design.md"}
+SKIP_FILES = {".DS_Store", "design.md",
+              # eddie's cross-vendor peer review is private-only (see SECTION_EXCLUDES)
+              "peer-review-brief.md"}
 
 # Directory names to skip anywhere in the source tree (plans, specs, and old
 # archives are internal working artifacts, not part of a skill's published API)
@@ -114,6 +116,8 @@ SKIP_FILE_PATTERNS = [
     re.compile(r"\.(bak\d*|backup|orig)$"),
     re.compile(r"~$"),
     re.compile(r"^NOTES-.*\.md$"),
+    #   - `peer_*.py` are eddie's cross-vendor peer helpers (private-only).
+    re.compile(r"^peer_(review|command|decode|state)\.py$"),
 ]
 
 # File extensions to apply scrub rules to
@@ -133,7 +137,10 @@ FILE_RENAME_RULES = [
 # a higher level. These document maintainer-only tooling that lives outside
 # this repo, so published copies would instruct installers to run commands
 # they don't have. Match is on heading text, case-insensitive.
-SECTION_EXCLUDES = {"voice feedback capture", "voice score check"}
+#   - "cross-model routing": eddie's cross-vendor peer review needs a pinned
+#     peer CLI and a private ledger; it stays private while in dogfood. Its
+#     helpers are skipped via SKIP_FILES / SKIP_FILE_PATTERNS.
+SECTION_EXCLUDES = {"voice feedback capture", "voice score check", "cross-model routing"}
 
 # --- Scrub Rules ---
 # Applied IN ORDER to all text file content.
@@ -153,6 +160,11 @@ SCRUB_RULES = [
     # names the source papers. The register guidance stands on its own, so the
     # attribution is dropped rather than rewritten.
     (r"\s*Source profile: `[^`]*AI Law Lab[^`]*`\s*\(built from [^)]*\)\.", ""),
+
+    # The opening marker sits above eddie's "Cross-model routing" heading, so
+    # the section strip (which starts at the heading) leaves it behind. The
+    # closing marker is inside the section and goes with it.
+    (r"<!-- EDDIE_CROSS_MODEL_START -->\n", ""),
 
     # --- Email addresses ---
     (r"pwagner@law\.upenn\.edu", "your-email@law.upenn.edu"),

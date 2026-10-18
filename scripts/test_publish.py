@@ -328,6 +328,39 @@ class ShouldSkipTests(unittest.TestCase):
     def test_asset_not_skipped(self):
         self._check("foo/assets/logo.png", False)
 
+    def test_eddie_peer_helpers_skipped(self):
+        for name in ("peer_review", "peer_command", "peer_decode", "peer_state"):
+            self._check(f"scripts/{name}.py", True)
+        self._check("references/peer-review-brief.md", True)
+
+    def test_other_scripts_not_skipped(self):
+        self._check("scripts/gen_docx.py", False)
+
+
+class EddieCrossModelStripTests(unittest.TestCase):
+    """The cross-vendor section is private-only: strip it and both markers."""
+
+    SOURCE = (
+        "Report contents.\n"
+        "\n"
+        "<!-- EDDIE_CROSS_MODEL_START -->\n"
+        "## Cross-model routing\n"
+        "\n"
+        "Run scripts/peer_review.py probe.\n"
+        "<!-- EDDIE_CROSS_MODEL_END -->\n"
+        "\n"
+        "## What Eddie Does Not Do\n"
+        "\n"
+        "Nothing.\n"
+    )
+
+    def test_section_and_markers_removed(self):
+        out, _ = publish.transform(self.SOURCE, is_markdown=True)
+        self.assertNotIn("Cross-model routing", out)
+        self.assertNotIn("peer_review", out)
+        self.assertNotIn("EDDIE_CROSS_MODEL", out)
+        self.assertIn("Report contents.\n\n## What Eddie Does Not Do\n", out)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

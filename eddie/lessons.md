@@ -117,6 +117,12 @@ go under "Project-specific" with the project name.
 
   - Applicant-facing hiring documents don't establish facts about existing staff. Before citing a posting, offer letter, or job description as evidence of a problem in a message to a current team, confirm the source actually covers that population — unresolved terms for new hires say nothing about people already on the roster.  (2026-08-30, PCL AI Project fall reboot Slack post)
 
+  - On a first-person bio page, do not flag wording the author dictated or re-approved in the current session on voice grounds; raise it only if it states something false. Re-litigating a fresh author decision burns credibility the same way re-flagging an Eddie-prescribed fix does.  (2026-10-09, polkwagner.com homepage review — voice pass flagged a sentence [Your Name] had dictated an hour earlier)
+
+  - A callout that describes an organization in third person, quoting that organization's own description, is not a register break on an otherwise first-person page. The first-person callouts describe the author's own work; the organization's is properly its own voice.  (2026-10-09, polkwagner.com homepage review — Penn Carey Law AI Project callout)
+
+  - **An SSRN abstract ID that differs from the ID scholarly indexes (Crossref, OpenAlex) associate with the same paper is a real warning sign: keep it at P2 and get it opened in a real browser.** SSRN blocks automated fetches, so the pipeline cannot open the page itself, and a removed posting does not 404 — it returns a generic "SSRN Electronic Library" page reading "This paper is under review or has been removed from SSRN." On the polkwagner.com homepage all four mismatched IDs (918842, 471121, 345822, 1338573) were dead postings and the index-listed IDs were the live ones. An author's "they check out" from memory is not a substitute for loading each link; Claude in Chrome passes SSRN's bot check on its own if pages are loaded about ten seconds apart.  (2026-10-09, polkwagner.com homepage review — an earlier version of this lesson said the opposite and was wrong)
+
 ## Project-specific
 
 **JD Concentrations** (`Deputy Dean Background Materials/.../Curricular Items/JD Concentrations`)
@@ -138,3 +144,5 @@ go under "Project-specific" with the project name.
   - **Fri Sept 25 = erev Sukkot. [Your Name] decided 2026-07-24 to keep the date and say nothing about it in the memo.** Deliberate. Do not re-flag. (Separately, the Sept 24 faculty retreat is a Thursday-only calendar entry, so Sept 25 is clear as published; the only residual risk is the "(tentative)" tag on Sept 24.)  (2026-07-27)
 
   - **The addressee committee is the Educational *Programs* Committee.** Overview drafts v1–v6 and `JD-concentrations-EPC-memo-v0.md` say "Educational Policy Committee." That is wrong, and it originated in an unsourced line in the 2026-05-05 Eddie review. Do not "correct" Programs to Policy.  (2026-07-21)
+
+  - **When a ratio follows a "beyond chance" or "net of baseline" clause, check what it compares before flagging it.** In "roughly 6 more than chance improve … about four times as many clearly slip," the ratio is of excess-over-baseline counts ((32 − 4.5)/(11 − 4.5) ≈ 4.2), not raw counts (32/11 ≈ 2.9). Test the arithmetic on the sentence's own terms; if the baseline itself is wrong, that is the finding, not the ratio.  (2026-10-16, Can teaching change? statistical review — second eyes cleared a consistency flag)

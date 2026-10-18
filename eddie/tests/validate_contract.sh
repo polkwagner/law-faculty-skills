@@ -28,6 +28,21 @@ require 'use it for the factual pass'
 require 'only a claim extractor'
 require 'evidence ledger'
 require 'Natural-language requests are valid'
+# Cross-model routing ships only in the private copy; publish.py strips the
+# section and the peer helpers from the public one. Keyed on the heading, not
+# the helper, so a private copy that loses peer_review.py still fails.
+if grep -Fq '## Cross-model routing' "$skill"; then
+  require 'EDDIE_CROSS_MODEL_START'
+  require 'cross-vendor=on'
+  require 'scripts/peer_review.py'
+  require 'reconciliation.json'
+  require 'Silence is not disagreement'
+  require 'never a permission prompt'
+  require 'Run the cross-vendor peer review on this document?'
+  require 'Yes as the first and default option'
+  test -f "$skill_dir/references/peer-review-brief.md"
+  test -f "$skill_dir/scripts/peer_review.py"
+fi
 reject 'Hard abort if `factual-pipeline-orchestrator` is missing.'
 reject 'Always dispatch agents 1-5 concurrently'
 
